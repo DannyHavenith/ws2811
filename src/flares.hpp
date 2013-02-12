@@ -68,7 +68,7 @@ private:
 			if (amplitude > 256)
 			{
 				amplitude = 256;
-				speed = -(speed/2 + 1);
+				speed = -(speed/4 + 1);
 			}
 		}
 	}
@@ -85,7 +85,7 @@ void create_random_flare( flare &f, uint8_t count)
 	f.color = rgb( random_brightness(), random_brightness(), random_brightness());
 	f.amplitude = 0;
 	f.position = rand() % count; // not completely random.
-	f.speed = (3 * (rand() & 0x03))+1;
+	f.speed = (2 * (rand() & 0x07))+4;
 }
 
 void flares( uint8_t channel)
@@ -112,7 +112,7 @@ void flares( uint8_t channel)
     			create_random_flare( flares[current_flare], 60);
     			++current_flare;
     			if (current_flare >= flare_count) current_flare = 0;
-    			flare_pause = rand() % 40;
+    			flare_pause = rand() % 80;
     		}
     	}
 
@@ -124,9 +124,6 @@ void flares( uint8_t channel)
     	send( leds, channel);
     	_delay_ms( 10);
     }
-
-
-
 }
 } // end namespace flares
 

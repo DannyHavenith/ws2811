@@ -25,7 +25,7 @@ public:
 	void step( rgb (&leds)[size])
 	{
 		step( size);
-		set( leds, size);
+		draw( leds, size);
 	}
 
 
@@ -71,7 +71,7 @@ private:
 				);
 	}
 
-	void set( rgb *leds, uint8_t end) const
+	void draw( rgb *leds, uint8_t end) const
 	{
 		uint8_t step = going_forward?static_cast<uint8_t>(-1):1;
 		uint8_t pos = position;

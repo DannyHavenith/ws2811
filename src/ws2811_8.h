@@ -49,13 +49,13 @@ struct rgb
  * be used is an argument to this function. This allows a single instance of this function
  * to control up to 8 separate channels.
  */
-template< uint8_t array_size>
-void send( rgb (&values)[array_size], uint8_t bit)
+
+void send( const rgb *values, uint8_t array_size, uint8_t bit)
 {
     const uint8_t mask =_BV(bit);
     uint8_t low_val = WS2811_PORT & (~mask);
     uint8_t high_val = WS2811_PORT | mask;
-    uint8_t size = sizeof values; // size in bytes
+    uint8_t size = array_size * sizeof values[0]; // size in bytes
 
 
     // reset the controllers by pulling the data line low
@@ -204,6 +204,13 @@ void send( rgb (&values)[array_size], uint8_t bit)
     );
 
 }
+
+template< uint8_t array_size>
+void send( rgb (&values)[array_size], uint8_t bit)
+{
+	send( &values[0], array_size, bit);
+}
+
 }
 
 
