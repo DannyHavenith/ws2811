@@ -9,6 +9,7 @@
 #define WATER_TORTURE_HPP_
 #include "ws2811_8.h"
 #include <string.h>
+
 namespace water_torture
 {
 	using ws2811::rgb;
@@ -18,6 +19,15 @@ namespace water_torture
 		return (static_cast<uint16_t>( value) * multiplier) >> 8;
 	}
 
+	/// This class maintains the state and calculates the animations to render a falling water droplet
+	/// Objects of this class can have three states:
+	///    - inactive: this object does nothing
+	///    - swelling: the droplet is at the top of the led strip and swells in intensity
+	///    - falling: the droplet falls downwards and accelerates
+	///    - bouncing: the droplet has bounced of the ground. A smaller, less intensive droplet bounces up
+	///      while a part of the drop remains on the ground.
+	/// After going through the swelling, falling and bouncing phases, the droplet automatically returns to the
+	/// inactive state.
 	class droplet
 	{
 	public:
@@ -113,6 +123,7 @@ namespace water_torture
 		}
 
 private:
+		/// Add  two numbers and clip the result at 255.
 		static uint8_t add_clipped( uint16_t left, uint16_t right)
 		{
 			uint16_t result = left + right;
@@ -120,6 +131,7 @@ private:
 			return result;
 		}
 
+		/// Add the right rgb value to the left one, clipping if necessary
 		static void add_clipped_to( rgb &left, const rgb &right)
 		{
 					left.red   = add_clipped(left.red, right.red);
@@ -134,6 +146,8 @@ private:
 			return (static_cast<uint16_t>( value) * multiplier) >> 8;
 		}
 
+		/// scale an rgb value up or down. amplitude > 256 means scaling up, while
+		/// amplitude < 256 means scaling down.
 		static rgb scale(rgb value, uint16_t amplitude)
 		{
 			return rgb(
@@ -176,14 +190,16 @@ private:
 						), 5);
 	}
 
+	/// Create the complete water torture animation.
+	/// This will render droplets at random intervals, up to a given maximum number of droplets.
 	void animate( rgb *leds, uint8_t led_count, uint8_t channel)
 	{
 
 
 	    const uint8_t droplet_count = 4;
-	    droplet droplets[droplet_count];
-	    uint8_t current_droplet = 0;
-	    uint8_t droplet_pause = 1;
+	    droplet droplets[droplet_count]; // droplets that can animate simultaneously.
+	    uint8_t current_droplet = 0; // index of the next droplet to be created
+	    uint8_t droplet_pause = 1; // how long to wait for the next one
 
 	    for(;;)
 	    {
