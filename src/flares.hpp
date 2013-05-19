@@ -27,10 +27,10 @@ public:
 	:color( 255,255,255), position(0), amplitude(0), speed(0)
 	{}
 
-	rgb 	color;
-	uint8_t position;
+	rgb 	 color;
+	uint16_t position;
 	uint16_t amplitude;
-	int8_t 	speed;
+	int8_t 	 speed;
 
 private:
 
@@ -80,7 +80,7 @@ uint8_t random_brightness()
 	return  150 - (rand() % 80);
 }
 
-void create_random_flare( flare &f, uint8_t count)
+void create_random_flare( flare &f, uint16_t count)
 {
 	f.color = rgb( random_brightness(), random_brightness(), random_brightness());
 	f.amplitude = 0;
@@ -109,7 +109,7 @@ void flares( uint8_t channel)
     	{
     		if (!flares[current_flare].amplitude)
     		{
-    			create_random_flare( flares[current_flare], 60);
+    			create_random_flare( flares[current_flare], led_count);
     			++current_flare;
     			if (current_flare >= flare_count) current_flare = 0;
     			flare_pause = rand() % 80;

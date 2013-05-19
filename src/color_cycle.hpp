@@ -12,7 +12,7 @@
 namespace color_cycle
 {
 
-template< uint8_t size>
+template< uint16_t size>
 void scroll( ws2811::rgb new_value, ws2811::rgb (&range)[size])
 {
     for (uint8_t idx = size-1; idx != 0 ; --idx)
@@ -22,7 +22,7 @@ void scroll( ws2811::rgb new_value, ws2811::rgb (&range)[size])
     range[0] = new_value;
 }
 
-template< uint8_t led_count>
+template< uint16_t led_count>
 void animate( const ws2811::rgb &new_value, ws2811::rgb (&leds)[led_count], uint8_t channel)
 {
     scroll( new_value, leds);
@@ -30,7 +30,7 @@ void animate( const ws2811::rgb &new_value, ws2811::rgb (&leds)[led_count], uint
     _delay_ms( 40);
 }
 
-template<uint8_t count, uint8_t led_count>
+template<uint8_t count, uint16_t led_count>
 void color_cycle( ws2811::rgb (&sequence)[count], ws2811::rgb (&leds)[led_count], uint8_t channel)
 {
 	for (;;)

@@ -190,11 +190,24 @@ private:
 						), 5);
 	}
 
+	template<bool assertion>
+	struct static_assert_ {};
+
+	template<>
+	struct static_assert_<true>
+	{
+	  static void is_true(){};
+	};
+
 	/// Create the complete water torture animation.
 	/// This will render droplets at random intervals, up to a given maximum number of droplets.
-	void animate( rgb *leds, uint8_t led_count, uint8_t channel)
+	/// The maximum led count is 256
+	template< uint16_t led_count>
+	void animate( rgb (&leds)[led_count], uint8_t channel)
 	{
-
+	    // if you get an error that 'is_true' is not a member of static_assert_, you're probably using
+	    // more than 255 leds, which doesn't work for this function.
+	    static_assert_< led_count <= 255>::is_true();
 
 	    const uint8_t droplet_count = 4;
 	    droplet droplets[droplet_count]; // droplets that can animate simultaneously.

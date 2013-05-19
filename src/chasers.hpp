@@ -21,7 +21,7 @@ static const uint16_t amplitudes[] = {
 class chaser
 {
 public:
-	template<uint8_t size>
+	template<uint16_t size>
 	void step( rgb (&leds)[size])
 	{
 		step( size);
@@ -29,12 +29,12 @@ public:
 	}
 
 
-	chaser( const rgb &color, uint8_t position, bool forward)
+	chaser( const rgb &color, uint16_t position, bool forward)
 	:color( color), position(position), going_forward(forward)
 	{}
 
 	rgb 	color;
-	uint8_t position;
+	uint16_t position;
 	bool 	going_forward;
 
 private:
@@ -71,21 +71,16 @@ private:
 				);
 	}
 
-	void draw( rgb *leds, uint8_t end) const
+	void draw( rgb *leds, uint16_t end) const
 	{
-		uint8_t step = going_forward?static_cast<uint8_t>(-1):1;
-		uint8_t pos = position;
+		uint16_t step = going_forward?static_cast<uint16_t>(-1):1;
+		uint16_t pos = position;
 		for (uint8_t count = 0; count < sizeof amplitudes/sizeof amplitudes[0];++count)
 		{
 			rgb value = scale( color, amplitudes[count]);
 			leds[pos] = add_clipped( leds[pos], value);
 			pos += step;
-			if (pos == 255)
-			{
-				step = -step;
-				pos = 0;
-			}
-			else if( pos == end)
+			if( pos == end)
 			{
 				step = -step;
 				pos = end -1;
@@ -93,7 +88,7 @@ private:
 		}
 	}
 
-	void step( uint8_t end)
+	void step( uint16_t end)
 	{
 		if (going_forward)
 		{
