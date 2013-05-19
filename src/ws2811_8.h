@@ -61,7 +61,7 @@ void send( const rgb *values, uint16_t array_size, uint8_t bit)
     // reset the controllers by pulling the data line low
     uint8_t bitcount = 4;
     WS2811_PORT = low_val;
-    _delay_us( 10);
+    _delay_us( 40);
 
     // note: the labels in this piece of assembly code aren't very explanatory. The real documentation
     // of this code can be found in the spreadsheet ws2811@8Mhz.ods
@@ -69,9 +69,9 @@ void send( const rgb *values, uint16_t array_size, uint8_t bit)
     // The code could be made a little shorter by combining adjacent nops into RJMPS, but since I'm expecting
     // to re-assemble the code fragments from the spreadsheet at some point, I'm not bothering with that now.
     asm volatile(
+        "       LDI %[bits], 4"    "\n"
         "       LD __tmp_reg__, %a[dataptr]+"     "\n" // fill the first byte and determine first bit value
         "       LSL __tmp_reg__"   "\n"
-        "       LDI %[bits], 4"    "\n"
         "       BRCC L0x00"  "\n"
         "       RJMP L1x00"   "\n"
         "L0005: SUBI %[bits], 1"         "\n"
@@ -86,8 +86,8 @@ void send( const rgb *values, uint16_t array_size, uint8_t bit)
         "       LSL __tmp_reg__"         "\n"
         "       BRCC P0x19"      "\n"
         "       RJMP L1x00"      "\n"
-        "M1006: RJMP Mx008"     "\n"
-//      "       NOP"     "\n"
+        "M1006: NOP"     "\n"
+        "       NOP"     "\n"
         "Mx008: OUT %[portout], %[downreg]"      "\n"
         "       NOP"     "\n"
         "       OUT %[portout], %[upreg]"        "\n"
@@ -97,8 +97,8 @@ void send( const rgb *values, uint16_t array_size, uint8_t bit)
         "       LSL __tmp_reg__"         "\n"
         "       BRCS P1x17"      "\n"
         "       RJMP P0x18"      "\n"
-        "Hx017: RJMP XX0"     "\n"
-//      "       NOP"     "\n"
+        "Hx017: NOP"     "\n"
+        "       NOP"     "\n"
         "XX0:   NOP"     "\n"
         "       OUT %[portout], %[upreg]"        "\n"
         "       RJMP END"        "\n"
@@ -154,14 +154,14 @@ void send( const rgb *values, uint16_t array_size, uint8_t bit)
         "       OUT %[portout], %[downreg]"      "\n"
         "       NOP"     "\n"
         "       OUT %[portout], %[upreg]"        "\n"
-        "       RJMP XX1"     "\n"
-//      "       NOP"     "\n"
+        "       NOP"     "\n"
+        "       NOP"     "\n"
         "XX1:   NOP"     "\n"
         "       LSL __tmp_reg__"         "\n"
         "       BRCS P1x17"      "\n"
         "       RJMP P0x18"      "\n"
-        "Hx115: RJMP XX2"     "\n"
-//      "       NOP"     "\n"
+        "Hx115: NOP"     "\n"
+        "       NOP"     "\n"
         "XX2:   NOP"     "\n"
         "       OUT %[portout], %[downreg]"      "\n"
         "       NOP"     "\n"
