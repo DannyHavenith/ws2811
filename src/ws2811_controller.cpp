@@ -11,15 +11,18 @@
 //#include "chasers.hpp"
 //#include "flares.hpp"
 //#include "color_cycle.hpp"
-#include "water_torture.hpp"
+//#include "water_torture.hpp"
+#define WS2811_PORT PORTB
+#include "campfire.hpp"
 
 int main()
 {
     static const uint8_t channel = 5;
     static const uint16_t led_count = 60;
-    DDRC = _BV(channel);
+    DDRB = _BV(channel);
     ws2811::rgb leds[led_count];
-    water_torture::animate( leds, channel);
+    campfire( leds, channel);
+    //water_torture::animate( leds, channel);
     //flares::flares( channel);
     //chasers( channel);
     //color_cycle::example_color_cycle( 5);

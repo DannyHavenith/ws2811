@@ -39,6 +39,7 @@ struct rgb
     uint8_t green;
     uint8_t red;
     uint8_t blue;
+
 };
 
 
@@ -50,12 +51,12 @@ struct rgb
  * to control up to 8 separate channels.
  */
 
-void send( const rgb *values, uint16_t array_size, uint8_t bit)
+void send( const void *values, uint16_t array_size, uint8_t bit)
 {
     const uint8_t mask =_BV(bit);
     uint8_t low_val = WS2811_PORT & (~mask);
     uint8_t high_val = WS2811_PORT | mask;
-    uint16_t size = array_size * sizeof values[0]; // size in bytes
+    uint16_t size = array_size * sizeof( rgb); // size in bytes
 
 
     // reset the controllers by pulling the data line low
