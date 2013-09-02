@@ -8,7 +8,7 @@
 #ifndef FLARES_HPP_
 #define FLARES_HPP_
 #include <stdlib.h>
-#include "ws2811_8.h"
+#include "ws2811.h"
 
 namespace flares
 {

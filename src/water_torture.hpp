@@ -7,7 +7,7 @@
 
 #ifndef WATER_TORTURE_HPP_
 #define WATER_TORTURE_HPP_
-#include "ws2811_8.h"
+#include "ws2811.h"
 #include <string.h>
 
 namespace water_torture

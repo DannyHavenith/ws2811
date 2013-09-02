@@ -12,7 +12,7 @@
 
 #ifndef RGB_OPERATORS_HPP_
 #define RGB_OPERATORS_HPP_
-#include "ws2811_8.h"
+#include "rgb.h"
 
 namespace ws2811
 {

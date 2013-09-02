@@ -8,7 +8,7 @@
 #ifndef CHASERS_HPP_
 #define CHASERS_HPP_
 #include <stdlib.h>
-#include "ws2811_8.h"
+#include "ws2811.h"
 #include <string.h>
 using ws2811::rgb;
 

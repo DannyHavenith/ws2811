@@ -10,8 +10,8 @@
  * This file contains a definition of the send() function for 9.6 Mhz controllers.
  */
 
-#ifndef WS2811_8_H_
-#define WS2811_8_H_
+#ifndef WS2811_96_H_
+#define WS2811_96_H_
 #include <avr/io.h>
 #include "rgb.h"
 
@@ -76,8 +76,7 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
 	"XX5:	OUT %[portout], %[upreg]"		"\n"
 	"		RJMP END"		"\n"
 	"P0x19:	OUT %[portout], %[downreg]"		"\n"
-	"P0x1a:	NOP"		"\n"
-	"		NOP"		"\n"
+	"P0x1a:	RJMP L0x00"		"\n"
 	"L0x00:	OUT %[portout], %[upreg]"		"\n"
 	"		NOP"		"\n"
 	"		LSL __tmp_reg__"		"\n"
@@ -145,7 +144,7 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
 	"		RJMP XX12"		"\n"
 	"XX12:	OUT %[portout], %[upreg]"		"\n"
 	"		RJMP END"		"\n"
-	"END:	NOP"		"\n"
+	"END:	"		"\n"
 
 : /* no output */
 : /* inputs */
@@ -161,6 +160,4 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
 
 }
 
-
-
-#endif /* WS2811_8_H_ */
+#endif /* WS2811_96_H_ */
