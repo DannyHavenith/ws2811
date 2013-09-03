@@ -107,11 +107,11 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.release.1932315512" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.release"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="de.innot.avreclipse.configuration.app.release.1041163779.1928261277" name="ws2811_controller.cpp" rcbsApplicability="disable" resourcePath="src/ws2811_controller.cpp" toolsToInvoke="de.innot.avreclipse.tool.cppcompiler.app.release.2084711765.1529415031">
-						<tool id="de.innot.avreclipse.tool.cppcompiler.app.release.2084711765.1529415031" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.release.2084711765"/>
+					<fileInfo id="de.innot.avreclipse.configuration.app.release.1041163779.2051970743" name="ws2811_controller.cpp" rcbsApplicability="disable" resourcePath="src/ws2811_controller.cpp" toolsToInvoke="de.innot.avreclipse.tool.cppcompiler.app.release.2084711765.2053506119">
+						<tool id="de.innot.avreclipse.tool.cppcompiler.app.release.2084711765.2053506119" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.release.2084711765"/>
 					</fileInfo>
 					<sourceEntries>
-						<entry excluding="src/ws2811_controller.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/ws2811_controller_low_ram.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
