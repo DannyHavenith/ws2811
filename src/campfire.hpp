@@ -90,7 +90,7 @@ private:
 template< uint16_t size>
 void campfire( rgb (&leds)[size], uint8_t channel)
 {
-	static const uint8_t flamecount = 20;
+	static const uint8_t flamecount = 10;
 	flame flames[flamecount];
 	const uint16_t step = (size - pattern_size)/flamecount;
 	for (uint16_t pos = 0; pos < flamecount; ++pos)

@@ -8,6 +8,7 @@
 #ifndef COLOR_CYCLE_HPP_
 #define COLOR_CYCLE_HPP_
 #include "ws2811.h"
+#include <util/delay.h>
 
 namespace color_cycle
 {
@@ -27,11 +28,11 @@ void animate( const ws2811::rgb &new_value, ws2811::rgb (&leds)[led_count], uint
 {
     scroll( new_value, leds);
     send( leds, channel);
-    _delay_ms( 40);
+    _delay_ms( 100);
 }
 
 template<uint8_t count, uint16_t led_count>
-void color_cycle( ws2811::rgb (&sequence)[count], ws2811::rgb (&leds)[led_count], uint8_t channel)
+void color_cycle( const ws2811::rgb (&sequence)[count], ws2811::rgb (&leds)[led_count], uint8_t channel)
 {
 	for (;;)
 	{

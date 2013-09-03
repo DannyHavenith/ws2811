@@ -13,6 +13,7 @@
 #ifndef WS2811_8_H_
 #define WS2811_8_H_
 #include <avr/io.h>
+#include <util/delay_basic.h>
 #include "rgb.h"
 
 namespace ws2811
@@ -36,7 +37,7 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
     // reset the controllers by pulling the data line low
     uint8_t bitcount = 4;
     WS2811_PORT = low_val;
-    _delay_us( 40);
+    _delay_loop_1(107); // at 3 clocks per iteration, this is 320 ticks or 40us at 8Mhz
 
     // note: the labels in this piece of assembly code aren't very explanatory. The real documentation
     // of this code can be found in the spreadsheet ws2811@8Mhz.ods
