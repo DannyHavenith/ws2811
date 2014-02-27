@@ -48,30 +48,6 @@ void color_cycle( const ws2811::rgb (&sequence)[count], ws2811::rgb (&leds)[led_
 	}
 }
 
-void example_color_cycle( uint8_t channel)
-{
-	using ws2811::rgb;
-	rgb leds[60];
-	rgb sequence[] = {
-			rgb( 0, 10, 20),
-			rgb( 0, 20, 40),
-			rgb( 0, 30, 60),
-			rgb( 10, 30, 40),
-			rgb( 20, 40, 50),
-			rgb( 30, 50, 40),
-			rgb( 40, 50, 40),
-			rgb( 50, 50, 40),
-			rgb( 60, 50, 40),
-			rgb( 100, 50, 40),
-			rgb( 100, 40, 30),
-			rgb( 100, 30, 20),
-			rgb( 100, 20, 10),
-			rgb( 100, 0,0)
-	};
-
-	color_cycle( sequence, leds, channel);
-
-}
 }
 
 #endif /* COLOR_CYCLE_HPP_ */

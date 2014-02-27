@@ -10,32 +10,42 @@
 #define WS2811_PORT PORTB
 
 #include <avr/io.h>
-#include "color_cycle.hpp"
 #include "ws2811.h"
+#include <util/delay.h>
 
 using namespace ws2811;
 
 namespace {
 	/// transmit on bit 4
 	const uint8_t channel = 4;
+	uint8_t buffer[30];
+}
 
-	/// where in a low-ram situation, limit the number of leds
-	/// to 15 (=45 bytes)
-	const uint16_t led_count = 15;
-
-	rgb leds[led_count];
-
-	/// color sequence to cycle (additional 12 bytes)
-	const rgb sequence[] = {
-			rgb( 128, 40, 0),
-			rgb( 0, 128, 40),
-			rgb( 40, 0, 128),
-			rgb( 50, 50, 50)
-	};
+void write_to( uint8_t *position, const rgb &color)
+{
+	*position++ = color.green;
+	*position++ = color.red;
+	*position++ = color.blue;
 }
 
 int main()
 {
     DDRB = _BV(channel);
-	color_cycle::color_cycle( sequence, leds, channel);
+    for(;;)
+    {
+		for (uint8_t count = 0; count < 19; ++count)
+		{
+			buffer[0] = count;
+			write_to( &buffer[1], rgb( 255, 0, 255));
+			send_sparse( buffer, channel);
+			_delay_ms(10);
+		}
+		for (uint8_t count = 20; count ; --count)
+		{
+			buffer[0] = count;
+			write_to( &buffer[1], rgb( 255, 0, 255));
+			send_sparse( buffer, channel);
+			_delay_ms(10);
+		}
+    }
 }
