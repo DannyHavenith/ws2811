@@ -8,36 +8,34 @@
 #ifndef CHASERS_HPP_
 #define CHASERS_HPP_
 #include <stdlib.h>
+#include <util/delay.h>
 #include "ws2811.h"
-#include <string.h>
 using ws2811::rgb;
 
 namespace
 {
-static const uint16_t amplitudes[] = {
-		256, 200, 150, 100, 80, 60, 50, 40, 30, 20, 10, 5, 4, 3, 2, 1
-};
 }
+
+template<typename buffer_type, typename pos_type = int16_t, uint8_t tail_count = 16>
 class chaser
 {
 public:
-	template<uint16_t size>
-	void step( rgb (&leds)[size])
+	void step( buffer_type &leds)
 	{
-		step( size);
-		draw( leds, size);
+
+		step();
+		draw( leds);
 	}
 
-
-	chaser( const rgb &color, uint16_t position, bool forward)
-	:color( color), position(position), going_forward(forward)
+	chaser( const rgb &color, pos_type position)
+	:color( color), position(position)
 	{}
 
-	rgb 	color;
-	uint16_t position;
-	bool 	going_forward;
+	rgb 	 color;
+	pos_type position;
 
 private:
+
 
 	/// multiply an 8-bit value with an 8.8 bit fixed point number.
 	/// multiplier should not be higher than 1.00 (or 256).
@@ -55,9 +53,9 @@ private:
 		);
 	}
 
-	static uint8_t add_clipped( uint16_t left, uint16_t right)
+	static uint8_t add_clipped( uint8_t left, uint8_t right)
 	{
-		uint16_t result = left + right;
+		uint16_t result = static_cast<uint16_t>(left) + right;
 		if (result > 255) result = 255;
 		return result;
 	}
@@ -71,60 +69,60 @@ private:
 				);
 	}
 
-	void draw( rgb *leds, uint16_t end) const
+	static pos_type abs( pos_type pos)
 	{
-		uint16_t step = going_forward?static_cast<uint16_t>(-1):1;
-		uint16_t pos = position;
-		for (uint8_t count = 0; count < sizeof amplitudes/sizeof amplitudes[0];++count)
+		return (pos < 0)?-pos:pos;
+	}
+
+	void draw( buffer_type &leds) const
+	{
+		static const uint8_t size = ws2811::led_buffer_traits<buffer_type>::count;
+		pos_type pos = position;
+		uint16_t amplitude = 256-256/tail_count + 4;
+		for (uint8_t count = tail_count; count ; --count)
 		{
-			rgb value = scale( color, amplitudes[count]);
-			leds[pos] = add_clipped( leds[pos], value);
-			pos += step;
-			if( pos == end)
+			rgb &loc = get(leds, abs( pos));
+			loc = add_clipped( loc, scale( color, amplitude));
+			amplitude -= 256/tail_count; // amplitude *= 0.75
+			--pos;
+			if( pos == -size)
 			{
-				step = -step;
-				pos = end -1;
+				pos = size -1;
 			}
 		}
 	}
 
-	void step( uint16_t end)
+	void step( )
 	{
-		if (going_forward)
+		static const uint8_t size = ws2811::led_buffer_traits<buffer_type>::count;
+		if (++position >= size)
 		{
-			if (++position >= end)
-			{
-				position = end -1;
-				going_forward = false;
-			}
+			position = -(size-1);
 		}
-		else
-		{
-			if (!--position)
-			{
-				going_forward = true;
-			}
-		}
+
 	}
 
 };
 
-void chasers( uint8_t channel)
+template<typename buffer_type>
+inline void chasers( buffer_type &leds, uint8_t channel)
 {
-	rgb leds[60];
-	chaser chasers[] = {
-			chaser( rgb( 50, 75, 15), 0, true),
-			chaser( rgb( 10, 40, 60), 30, true),
-			chaser( rgb( 255, 0,0), 50, true),
-			chaser( rgb( 100, 100, 100), 35, false)
+	static const uint8_t size = ws2811::led_buffer_traits<buffer_type>::count;
+
+	typedef chaser<buffer_type> chaser_type;
+	chaser_type chasers[] = {
+			chaser_type( rgb( 50, 75, 15), 0, true),
+			chaser_type( rgb( 10, 40, 60), 30, true),
+			chaser_type( rgb( 255, 0,0), 50, true),
+			chaser_type( rgb( 100, 100, 100), 35, false)
 	};
 
 	for(;;)
 	{
-		memset( (void *)leds, 0, sizeof leds);
+		clear( leds);
 		for ( uint8_t idx = 0; idx < sizeof chasers/sizeof chasers[0]; ++idx)
 		{
-			chasers[idx].step( leds);
+			chasers[idx].step( leds, size);
 		}
 		send( leds, channel);
 		_delay_ms( 30);

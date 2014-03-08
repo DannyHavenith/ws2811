@@ -14,6 +14,14 @@
 
 #ifndef WS2811_H_
 #define WS2811_H_
+#include <string.h> // for memset
+
+namespace ws2811 {
+template<typename buffer_type>
+struct led_buffer_traits
+{
+};
+}
 
 #if !defined( WS2811_PORT)
 #	define WS2811_PORT PORTC
@@ -34,11 +42,29 @@ namespace ws2811 {
  * This overload auto-detects the array size of the given rgb values.
  */
 template< uint16_t array_size>
-void send( rgb (&values)[array_size], uint8_t bit)
+inline void send( rgb (&values)[array_size], uint8_t bit)
 {
 	send( &values[0], array_size, bit);
 }
 
+template< uint16_t array_size>
+inline void set( rgb (&values)[array_size], uint16_t index, const rgb &value)
+{
+	values[index] = value;
+}
+
+template< uint16_t array_size>
+inline void clear( rgb (&values)[array_size])
+{
+	memset( (void *)values, 0, sizeof values);
+}
+
+template< uint16_t array_size>
+struct led_buffer_traits<rgb[array_size]>
+{
+	static const uint16_t count = array_size;
+	static const uint16_t size = sizeof( rgb) * array_size;
+};
 }
 
 
