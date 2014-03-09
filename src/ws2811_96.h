@@ -29,7 +29,6 @@ namespace ws2811
  * be used is an argument to this function. This allows a single instance of this function
  * to control up to 8 separate channels.
  */
-#if !defined(WS2811_SPARSE)
 void send( const void *values, uint16_t array_size, uint8_t bit)
 {
     const uint8_t mask =_BV(bit);
@@ -163,7 +162,14 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
 
 }
 
-#else // defined WS2811_SPARSE
+
+/**
+ * A data structure for a sparse representation of values in a LED string.
+ *
+ * A non-sparse representation of an LED string holds 3 bytes for every
+ * LED in the string. For a 60 LED string this means that at least 180 bytes
+ * of memory are required.
+ */
 template<uint8_t buffer_size, uint8_t led_string_size>
 struct sparse_leds
 {
@@ -312,7 +318,7 @@ void send_sparse( const void *buffer, uint8_t bit )
     		"        LDI %[bits], 23                         \n"
     		"z00:    OUT %[portout], %[upreg]                \n"
     		"        TST %[data]             \n"
-    		"        BREQ END                                \n"
+    		"        BREQ end                                \n"
     		"        OUT %[portout], %[downreg]              \n"
     		"        RJMP brk3                               \n"
     		"brk3:   SUBI %[bits], 1                         \n"
@@ -331,7 +337,7 @@ void send_sparse( const void *buffer, uint8_t bit )
     		"        BREQ z1b                                \n"
     		"        RJMP s00                                \n"
     		"z1b:    NOP                                     \n"
-    		"END:    OUT %[portout], %[upreg]                \n"
+    		"end:    OUT %[portout], %[upreg]                \n"
     		: /* no output */
     		: /* inputs */
     		[dataptr] "e" (buffer), 	// pointer to grb values
@@ -351,7 +357,6 @@ inline void send( const sparse_leds<buffer_size, led_string_size> &leds, uint8_t
 	send_sparse( leds.buffer,  channel);
 }
 
-#endif // defined WS2811_SPARSE
 }
 
 #endif /* WS2811_96_H_ */

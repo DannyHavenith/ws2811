@@ -39,7 +39,7 @@ namespace {
 				chasers_array[idx].step( buffer);
 			}
 			send( buffer, channel);
-			_delay_ms( 30);
+			_delay_ms( 25);
 		}
 	}
 
