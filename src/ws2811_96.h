@@ -7,7 +7,13 @@
 
 /**
  * Library for bit-banging data to WS2811 led controllers.
- * This file contains a definition of the send() function for 9.6 Mhz controllers.
+ * This file contains two implementations of the send() function for ws2811 controllers.
+ *
+ * The first implementation, send() expects an array of GRB-values and will send those
+ * to the given output pin.
+ *
+ * The second implementation send_sparse() expects an array filled with blocks of LEDS,
+ * interspersed with zero LED values.
  */
 
 #ifndef WS2811_96_H_
@@ -16,8 +22,6 @@
 #include <util/delay_basic.h>
 
 #include "rgb.h"
-
-#define WS2811_SPARSE
 
 namespace ws2811
 {
@@ -162,6 +166,8 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
 
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// This part of the file contains functions for sparse LED string buffers.
 
 /**
  * A data structure for a sparse representation of values in a LED string.
@@ -169,14 +175,40 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
  * A non-sparse representation of an LED string holds 3 bytes for every
  * LED in the string. For a 60 LED string this means that at least 180 bytes
  * of memory are required.
+ *
+ * This type also has a buffer of bytes, but these bytes hold sequences of
+ * the form:
+ * <jump>, <count>, G1, R1, B1, G2, R2, B2, <jump>, <count>, G3, R3, B3, etc...
+ *
+ * <jump> represents an amount of black pixels, <count> is the number of GRB values
+ * that follow
+ *
+ * A buffer is terminated by a zero <jump> value or a zero <count>. The first <jump>
+ * never terminates the sequence, even if it is zero. A zero <jump> count at the start
+ * means the string starts with a lit LED.
  */
 template<uint8_t buffer_size, uint8_t led_string_size>
 struct sparse_leds
 {
 	uint8_t buffer[buffer_size];
+
+	/// move the range [begin, end> towards buffer_end.
+	/// buffer_end must be higher than end, for this function to work correctly.
+	/// The bytes that become available are filled with zeros.
+	static void move_right( uint8_t *begin, uint8_t *end, uint8_t *buffer_end)
+	{
+		while (begin < end) *(--buffer_end) = *(--end);
+		while( begin < buffer_end) *(--buffer_end) = 0;
+	}
 };
 
-
+/**
+ * specialization of the led_buffer_traits for sparse buffers.
+ *
+ * For regular arrays, the led string size is simply the number of bytes
+ * divided by three. A sparse buffer has the number of leds encoded in the
+ * type as a template argument.
+ */
 template< uint8_t buffer_size, uint8_t led_string_size>
 struct led_buffer_traits<sparse_leds<buffer_size, led_string_size> >
 {
@@ -184,6 +216,10 @@ struct led_buffer_traits<sparse_leds<buffer_size, led_string_size> >
 	static const uint8_t size = buffer_size;
 };
 
+/**
+ * clear a sparse buffer. This fills the buffer with as many
+ * black leds as there are leds in the string.
+ */
 template<uint8_t buffer_size, uint8_t led_string_size>
 inline void clear( sparse_leds<buffer_size, led_string_size> &leds)
 {
@@ -192,12 +228,23 @@ inline void clear( sparse_leds<buffer_size, led_string_size> &leds)
 }
 
 
-void move_right( uint8_t *begin, uint8_t *end, uint8_t *buffer_end)
-{
-	while (begin < end) *(--buffer_end) = *(--end);
-	while( begin < buffer_end) *(--buffer_end) = 0;
-}
-
+/**
+ * Given a sparse buffer and a position in the LED string, find the position in
+ * the buffer that corresponds with this LED. If such a position did not exist, it
+ * will be created by introducing a new block inside the buffer or by appending
+ * a location for the LED at the start or end of an existing block.
+ *
+ * This function assumes that the current buffer already covers the complete LED
+ * string, or in other words, the sum of all <jump> and <count> values must be higher
+ * than the argument 'position' to this function. This function makes sure that
+ * the sum of <jump>s and <count>s remains the same.
+ *
+ * This function is deliberately not implemented as an operator[] of sparse_leds, because
+ * using an explicit function call makes it clear that code is being run and that it is
+ * worthwhile to store the result of this function instead of calling the functioni twice.
+ * Measurements have shown that the compiler will not optimize a second call to this function with
+ * the same arguments out of the code.
+ */
 template<uint8_t buffer_size, uint8_t led_string_size>
 rgb & get( sparse_leds<buffer_size, led_string_size> &leds, uint8_t position)
 {
@@ -215,7 +262,7 @@ rgb & get( sparse_leds<buffer_size, led_string_size> &leds, uint8_t position)
 		{
 			// need to add a new block before the one we're pointing at.
 			*buffer_iterator = (jump_pos - position - 1);
-			move_right( buffer_iterator, end - 5, end);
+			leds.move_right( buffer_iterator, end - 5, end);
 			*buffer_iterator++ = position - current_pos;
 			*buffer_iterator++=1;
 			break;
@@ -229,7 +276,7 @@ rgb & get( sparse_leds<buffer_size, led_string_size> &leds, uint8_t position)
 			++buffer_iterator;
 			++*buffer_iterator;
 			++buffer_iterator;
-			move_right( buffer_iterator, end-3, end);
+			leds.move_right( buffer_iterator, end-3, end);
 			break;
 		}
 		++buffer_iterator; // pointing at the led block size
@@ -254,14 +301,14 @@ rgb & get( sparse_leds<buffer_size, led_string_size> &leds, uint8_t position)
 				// 1 for the new led.
 				*buffer_iterator += *(buffer_iterator + jump_pos + 1)+1;
 				buffer_iterator += jump_pos;
-				move_right( buffer_iterator, end - 1, end);
+				leds.move_right( buffer_iterator, end - 1, end);
 			}
 			else
 			{
 				// distance is non-zero, just enlarge the current block
 				++*buffer_iterator;
 				buffer_iterator += jump_pos;
-				move_right( buffer_iterator, end - 3, end);
+				leds.move_right( buffer_iterator, end - 3, end);
 			}
 			break;
 		}
@@ -269,9 +316,13 @@ rgb & get( sparse_leds<buffer_size, led_string_size> &leds, uint8_t position)
 	}
 
 	return *(reinterpret_cast<rgb *>(buffer_iterator));
-
 }
 
+/**
+ * Send a sparse buffer, containing blocks of LED values interspersed with counts of
+ * black LEDs to a WS2811 string, using bit 'bit' of the port determined by the macro
+ * WS2811_PORT.
+ */
 void send_sparse( const void *buffer, uint8_t bit )
 {
     const uint8_t mask =_BV(bit);
@@ -351,6 +402,10 @@ void send_sparse( const void *buffer, uint8_t bit )
 
 
 }
+
+/**
+ * Interface adapter that allows sending a sparse buffer by using the send() function.
+ */
 template<uint8_t buffer_size, uint8_t led_string_size>
 inline void send( const sparse_leds<buffer_size, led_string_size> &leds, uint8_t channel)
 {
