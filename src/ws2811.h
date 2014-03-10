@@ -48,9 +48,9 @@ inline void send( rgb (&values)[array_size], uint8_t bit)
 }
 
 template< uint16_t array_size>
-inline void set( rgb (&values)[array_size], uint16_t index, const rgb &value)
+inline rgb& get( rgb (&values)[array_size], uint16_t index)
 {
-	values[index] = value;
+	return values[index];
 }
 
 template< uint16_t array_size>

@@ -42,8 +42,8 @@ int main()
 {
     DDRB = _BV(channel);
     //campfire( leds, channel);
-    //water_torture::animate( leds, channel);
-    //flares::flares( channel);
-    //chasers( channel);
+    //water_torture::animate<>( leds, channel);
+    //flares::flares<4>( buffer, channel);
+    //chasers( leds, channel);
     color_cycle::example_color_cycle( 5);
 }
