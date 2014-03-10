@@ -35,13 +35,12 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
 
 
     // reset the controllers by pulling the data line low
-    uint8_t bitcount = 4;
+    uint8_t bitcount = 7;
     WS2811_PORT = low_val;
     _delay_loop_1(107); // at 3 clocks per iteration, this is 320 ticks or 40us at 8Mhz
 
     // note: the labels in this piece of assembly code aren't very explanatory. The real documentation
     // of this code can be found in the spreadsheet ws2811@8Mhz.ods
-    // The order of the blocks of code have been determined by arrange_timed_code.cpp
     asm volatile(
     		"start:  LDI %[bits], 7                          \n"
     		"        LD __tmp_reg__, %a[dataptr]+            \n"
@@ -60,7 +59,7 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
     		"        OUT %[portout], %[downreg]              \n"
     		"        NOP                                     \n"
     		"        OUT %[portout], %[upreg]                \n"
-    		"        SBIW %[bytes], 1                       \n"
+    		"        SBIW %[bytes], 1                        \n"
     		"        LD __tmp_reg__, %a[dataptr]+            \n"
     		"        BRNE cont07                             \n"
     		"        RJMP brk18                              \n"
@@ -69,7 +68,7 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
     		"        OUT %[portout], %[upreg]                \n"
     		"        NOP                                     \n"
     		"        OUT %[portout], %[downreg]              \n"
-    		"        SBIW %[bytes], 1                       \n"
+    		"        SBIW %[bytes], 1                        \n"
     		"        LD __tmp_reg__, %a[dataptr]+            \n"
     		"        BRNE cont09                             \n"
     		"brk18:  OUT %[portout], %[downreg]              \n"
