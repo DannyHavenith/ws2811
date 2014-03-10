@@ -25,11 +25,11 @@
 
 #define WS2811_PORT PORTB
 
-//#include "chasers.hpp"
+#include "chasers.hpp"
 //#include "flares.hpp"
 //#include "color_cycle.hpp"
 //#include "water_torture.hpp"
-#include "campfire.hpp"
+//#include "campfire.hpp"
 namespace {
 
 static const uint8_t channel = 5;
@@ -41,9 +41,9 @@ ws2811::rgb leds[led_count];
 int main()
 {
     DDRB = _BV(channel);
-    campfire( leds, channel);
+    //campfire( leds, channel);
     //water_torture::animate( leds, channel);
     //flares::flares( channel);
-    //chasers( channel);
+    chasers( channel);
     //color_cycle::example_color_cycle( 5);
 }
