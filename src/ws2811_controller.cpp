@@ -44,6 +44,8 @@ int main()
     //campfire( leds, channel);
     //water_torture::animate( leds, channel);
     //flares::flares( channel);
-    chasers( channel);
+    chasers( leds, channel);
+    //color_cycle::example_color_cycle( 5);
+    //chasers( channel);
     //color_cycle::example_color_cycle( 5);
 }
