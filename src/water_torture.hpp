@@ -8,11 +8,17 @@
 #ifndef WATER_TORTURE_HPP_
 #define WATER_TORTURE_HPP_
 #include "ws2811.h"
-#include <string.h>
+#include <util/delay.h>
 
 namespace water_torture
 {
 	using ws2811::rgb;
+	/// very crude pseudo random generator
+	uint16_t my_rand()
+	{
+		static uint16_t state;
+		return state += 33203; // adding a prime number
+	}
 
 	uint8_t mult( uint8_t value, uint16_t multiplier)
 	{
@@ -28,6 +34,7 @@ namespace water_torture
 	///      while a part of the drop remains on the ground.
 	/// After going through the swelling, falling and bouncing phases, the droplet automatically returns to the
 	/// inactive state.
+	template<typename buffer_type>
 	class droplet
 	{
 	public:
@@ -43,8 +50,10 @@ namespace water_torture
 
 		}
 		/// calculate the next step in the animation for this droplet
-		void step( uint8_t maxpos)
+		void step()
 		{
+			static uint8_t maxpos =
+					ws2811::led_buffer_traits<buffer_type>::count - 1;
 			if (state == falling || state == bouncing)
 			{
 				position += speed;
@@ -83,37 +92,39 @@ namespace water_torture
 		}
 
 		/// perform one step and draw.
-		void step( rgb *leds, uint8_t ledcount)
+		void step( buffer_type &leds)
 		{
-			step( ledcount - 1);
-			draw( leds, ledcount - 1);
+			step();
+			draw( leds);
 		}
 
 		/// Draw the droplet on the led string
 		/// This will "smear" the light of this droplet between two leds. The closer
 		/// the droplets position is to that of a particular led, the brighter that
 		/// led will be
-		void draw( rgb *leds, uint8_t max_pos)
+		void draw( buffer_type &leds)
 		{
+			static uint8_t max_pos =
+					ws2811::led_buffer_traits<buffer_type>::count - 1;
 			if (state == falling || state == bouncing)
 			{
 				uint8_t position8 = position >> 8;
 				uint8_t remainder = position; // get the lower bits
 
-				add_clipped_to( leds[position8], scale( color, 256 - remainder ));
+				add_clipped_to( get( leds, position8), scale( color, 256 - remainder ));
 				if (remainder)
 				{
-					add_clipped_to( leds[position8+1], scale( color, remainder));
+					add_clipped_to( get( leds, position8+1), scale( color, remainder));
 				}
 
 				if (state == bouncing)
 				{
-					add_clipped_to( leds[max_pos], color);
+					add_clipped_to( get( leds, max_pos), color);
 				}
 			}
 			else if (state == swelling)
 			{
-				add_clipped_to( leds[0], scale( color, position));
+				add_clipped_to( get( leds, 0), scale( color, position));
 			}
 		}
 
@@ -148,7 +159,7 @@ private:
 
 		/// scale an rgb value up or down. amplitude > 256 means scaling up, while
 		/// amplitude < 256 means scaling down.
-		static rgb scale(rgb value, uint16_t amplitude)
+		static  rgb scale(rgb value, uint16_t amplitude)
 		{
 			return rgb(
 					mult( value.red, amplitude),
@@ -177,12 +188,13 @@ private:
 	uint8_t debugcount = 0;
 	volatile uint16_t random_scale()
 	{
-		return (rand() % 256);
+		return (my_rand() % 256);
 	}
 
-	void create_random_droplet( droplet &d)
+	template< typename buffer_type>
+	void create_random_droplet( droplet<buffer_type> &d)
 	{
-		d = droplet(
+		d = droplet<buffer_type>(
 				rgb(
 						mult( 100 ,random_scale()),
 						mult( 100, random_scale()),
@@ -202,15 +214,17 @@ private:
 	/// Create the complete water torture animation.
 	/// This will render droplets at random intervals, up to a given maximum number of droplets.
 	/// The maximum led count is 256
-	template< uint16_t led_count>
-	void animate( rgb (&leds)[led_count], uint8_t channel)
+	template< uint8_t droplet_count = 2, typename buffer_type>
+	void animate( buffer_type &leds, uint8_t channel)
 	{
+		static const uint16_t led_count = ws2811::led_buffer_traits<buffer_type>::count;
+
 	    // if you get an error that 'is_true' is not a member of static_assert_, you're probably using
 	    // more than 255 leds, which doesn't work for this function.
 	    static_assert_< led_count <= 255>::is_true();
 
-	    const uint8_t droplet_count = 4;
-	    droplet droplets[droplet_count]; // droplets that can animate simultaneously.
+	    typedef droplet<buffer_type> droplet_type;
+	    droplet_type droplets[droplet_count]; // droplets that can animate simultaneously.
 	    uint8_t current_droplet = 0; // index of the next droplet to be created
 	    uint8_t droplet_pause = 1; // how long to wait for the next one
 
@@ -227,17 +241,17 @@ private:
 	    			create_random_droplet( droplets[current_droplet]);
 	    			++current_droplet;
 	    			if (current_droplet >= droplet_count) current_droplet = 0;
-	    			droplet_pause = 100 + rand() % 80;
+	    			droplet_pause = 100 + my_rand() % 80;
 	    		}
 	    	}
 
-	    	memset( (void *)leds, 0, led_count * sizeof leds[0]);
+	    	clear( leds);
 	    	for (uint8_t idx = 0; idx < droplet_count; ++idx)
 	    	{
-	    		droplets[idx].step( leds, led_count);
+	    		droplets[idx].step( leds);
 	    	}
 
-	    	send( leds, led_count, channel);
+	    	send( leds, channel);
 	    	_delay_ms( 7);
 	    }
 	}

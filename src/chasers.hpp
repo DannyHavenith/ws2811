@@ -16,15 +16,54 @@ namespace
 {
 }
 
+/**
+ * Larson scanner.
+ *
+ * An object of this class will move a string of leds from left-to-right
+ * and from right-to-left over a WS2811 LED string. Each instantiation
+ * of this class can have its own color. The first led of the string
+ * will have that color, while the following leds have diminishing
+ * intensities.
+ *
+ * When the step() or draw() functions are called, the object will
+ * _add_ itself to the led string, so that overlapping chasers will
+ * mix their colors.
+ */
 template<typename buffer_type, typename pos_type = int16_t, uint8_t tail_count = 16>
 class chaser
 {
 public:
+
+	/**
+	 * calculate one animation step and draw the result to the
+	 * LED string.
+	 */
 	void step( buffer_type &leds)
 	{
 
 		step();
 		draw( leds);
+	}
+
+	/**
+	 * Only draw the current state to the given led string, don't animate.
+	 */
+	void draw( buffer_type &leds) const
+	{
+		static const uint8_t size = ws2811::led_buffer_traits<buffer_type>::count;
+		pos_type pos = position;
+		uint16_t amplitude = 256-256/tail_count + 4;
+		for (uint8_t count = tail_count; count ; --count)
+		{
+			rgb &loc = get(leds, abs( pos));
+			loc = add_clipped( loc, scale( color, amplitude));
+			amplitude -= 256/tail_count;
+			--pos;
+			if( pos == -size)
+			{
+				pos = size -1;
+			}
+		}
 	}
 
 	chaser( const rgb &color, pos_type position)
@@ -44,6 +83,8 @@ private:
 		return (static_cast<uint16_t>( value) * multiplier) >> 8;
 	}
 
+	/// scale a color with a 8.8 fixed point constant.
+	/// amplitude 256 corresponds with 1.0.
 	static rgb scale(rgb value, uint16_t amplitude)
 	{
 		return rgb(
@@ -53,6 +94,9 @@ private:
 		);
 	}
 
+	/// add two 8-bit integers without overflowing. If the
+	/// result of the addition is greater than 255, the result
+	/// will be clipped to 255.
 	static uint8_t add_clipped( uint8_t left, uint8_t right)
 	{
 		uint16_t result = static_cast<uint16_t>(left) + right;
@@ -60,6 +104,7 @@ private:
 		return result;
 	}
 
+	/// add two rgb values without overflow.
 	static rgb add_clipped( const rgb &left, const rgb &right)
 	{
 		return rgb(
@@ -69,29 +114,14 @@ private:
 				);
 	}
 
+	/// return the absolute value of the given position.
 	static pos_type abs( pos_type pos)
 	{
 		return (pos < 0)?-pos:pos;
 	}
 
-	void draw( buffer_type &leds) const
-	{
-		static const uint8_t size = ws2811::led_buffer_traits<buffer_type>::count;
-		pos_type pos = position;
-		uint16_t amplitude = 256-256/tail_count + 4;
-		for (uint8_t count = tail_count; count ; --count)
-		{
-			rgb &loc = get(leds, abs( pos));
-			loc = add_clipped( loc, scale( color, amplitude));
-			amplitude -= 256/tail_count; // amplitude *= 0.75
-			--pos;
-			if( pos == -size)
-			{
-				pos = size -1;
-			}
-		}
-	}
 
+	/// Make one animation step.
 	void step( )
 	{
 		static const uint8_t size = ws2811::led_buffer_traits<buffer_type>::count;
@@ -104,29 +134,47 @@ private:
 
 };
 
+template<typename buffer_type, typename chaser_array>
+inline void chasers( buffer_type &buffer, chaser_array &chasers_array, uint8_t channel)
+{
+	for(;;)
+	{
+		clear( buffer);
+		for ( uint8_t idx = 0; idx < sizeof chasers_array/sizeof chasers_array[0]; ++idx)
+		{
+			chasers_array[idx].step( buffer);
+		}
+		send( buffer, channel);
+		_delay_ms( 25);
+	}
+}
+
 template<typename buffer_type>
 inline void chasers( buffer_type &leds, uint8_t channel)
 {
 
 	typedef chaser<buffer_type> chaser_type;
-	chaser_type chasers[] = {
+
+	chaser_type chasers_array[] = {
 			chaser_type( rgb( 50, 75, 15), 0),
 			chaser_type( rgb( 10, 40, 60), 30),
 			chaser_type( rgb( 255, 0,0), 50),
 			chaser_type( rgb( 100, 100, 100), -35)
 	};
 
-	for(;;)
-	{
-		clear( leds);
-		for ( uint8_t idx = 0; idx < sizeof chasers/sizeof chasers[0]; ++idx)
-		{
-			chasers[idx].step( leds);
-		}
-		send( leds, channel);
-		_delay_ms( 30);
-	}
+	chasers( leds, chasers_array, channel);
 }
 
+template< typename buffer_type>
+inline void chasers_low_ram( buffer_type &buffer, uint8_t channel)
+{
+	typedef chaser<buffer_type, int8_t, 5> chaser_type;
+	chaser_type chasers_array[] = {
+			chaser_type( rgb( 50, 75, 15), 0),
+			chaser_type( rgb( 50, 15, 75), -30)
+	};
+
+	chasers( buffer, chasers_array, channel);
+}
 
 #endif /* CHASERS_HPP_ */
