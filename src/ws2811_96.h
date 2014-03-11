@@ -42,117 +42,38 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
 
 
     // reset the controllers by pulling the data line low
-    uint8_t bitcount = 4;
+    uint8_t bitcount = 7;
     WS2811_PORT = low_val;
-    _delay_loop_1( 128); // 40us = 384 ticks, 3 ticks per loop
+    _delay_loop_1( 384/3); // 40us = 384 ticks, 3 ticks per loop
 
-    // note: the labels in this piece of assembly code aren't very explanatory. The real documentation
-    // of this code can be found in the spreadsheet ws2811@8Mhz.ods
-    // The order of the blocks of code have been determined by arrange_timed_code.cpp
-    // jumps to labels of the form XXn are there to have single instruction words that take 2 cycles
+    // The real documentation of this code can be found in the spreadsheet ws2811@9.6Mhz.ods
+    // in the tab with name "reduced footprint  9.6".
+    // Jumps to labels of the form brknn are there to have single instruction words that take 2 cycles
     asm volatile(
-	"		LDI %[bits], 4"		"\n"
-	"		LD __tmp_reg__, %a[dataptr]+"		"\n"
-	"		LSL __tmp_reg__"		"\n"
-	"		BRCS P1x1b"		"\n"
-	"		RJMP L0x00"		"\n"
-	"L0006:	SUBI %[bits], 1"		"\n"
-	"		BRNE Mx009"		"\n"
-	"		LD __tmp_reg__, %a[dataptr]+"		"\n"
-	"		NOP"		"\n"
-	"		LDI %[bits], 4"		"\n"
-	"		OUT %[portout], %[upreg]"		"\n"
-	"		RJMP XX1"		"\n"
-	"XX1:	OUT %[portout], %[downreg]"		"\n"
-	"		SBIW %[bytes], 1"		"\n"
-	"		BREQ Hx018"		"\n"
-	"		LSL __tmp_reg__"		"\n"
-	"		BRCC P0x1a"		"\n"
-	"		RJMP P1x1b"		"\n"
-	"M1007:	RJMP Mx009"		"\n"
-	"Mx009:	OUT %[portout], %[downreg]"		"\n"
-	"		RJMP XX2"		"\n"
-	"XX2:	OUT %[portout], %[upreg]"		"\n"
-	"		RJMP XX3"		"\n"
-	"XX3:	OUT %[portout], %[downreg]"		"\n"
-	"		NOP"		"\n"
-	"		LSL __tmp_reg__"		"\n"
-	"		BRCS P1x18"		"\n"
-	"		RJMP P0x19"		"\n"
-	"Hx018:	RJMP XX4"		"\n"
-	"XX4:	RJMP XX5"		"\n"
-	"XX5:	OUT %[portout], %[upreg]"		"\n"
-	"		RJMP END"		"\n"
-	"P0x19:	OUT %[portout], %[downreg]"		"\n"
-	"P0x1a:	RJMP L0x00"		"\n"
-	"L0x00:	OUT %[portout], %[upreg]"		"\n"
-	"		NOP"		"\n"
-	"		LSL __tmp_reg__"		"\n"
-	"		OUT %[portout], %[downreg]"		"\n"
-	"		BRCC L0006"		"\n"
-	"		SUBI %[bits], 1"		"\n"
-	"		BRNE Mx108"		"\n"
-	"		LD __tmp_reg__, %a[dataptr]+"		"\n"
-	"		LDI %[bits], 4"		"\n"
-	"		RJMP XX6"		"\n"
-	"XX6:	OUT %[portout], %[upreg]"		"\n"
-	"		NOP"		"\n"
-	"		SBIW %[bytes], 1"		"\n"
-	"		BREQ Hx116"		"\n"
-	"		LSL __tmp_reg__"		"\n"
-	"		BRCS P1x18"		"\n"
-	"		RJMP P0x19"		"\n"
-	"P1x18:	NOP"		"\n"
-	"		OUT %[portout], %[downreg]"		"\n"
-	"		NOP"		"\n"
-	"P1x1b:	NOP"		"\n"
-	"L1x00:	OUT %[portout], %[upreg]"		"\n"
-	"		NOP"		"\n"
-	"		LSL __tmp_reg__"		"\n"
-	"		BRCS L1105"		"\n"
-	"		SUBI %[bits], 1"		"\n"
-	"		BRNE M1007"		"\n"
-	"		LD __tmp_reg__, %a[dataptr]+"		"\n"
-	"		LDI %[bits], 4"		"\n"
-	"		OUT %[portout], %[downreg]"		"\n"
-	"		RJMP XX7"		"\n"
-	"XX7:	OUT %[portout], %[upreg]"		"\n"
-	"		RJMP XX8"		"\n"
-	"XX8:	OUT %[portout], %[downreg]"		"\n"
-	"		SBIW %[bytes], 1"		"\n"
-	"		BREQ Hx018"		"\n"
-	"		LSL __tmp_reg__"		"\n"
-	"		BRCC P0x1a"		"\n"
-	"		RJMP P1x1b"		"\n"
-	"L1105:	SUBI %[bits], 1"		"\n"
-	"		BRNE Mx108"		"\n"
-	"		LD __tmp_reg__, %a[dataptr]+"		"\n"
-	"		OUT %[portout], %[downreg]"		"\n"
-	"		NOP"		"\n"
-	"		LDI %[bits], 4"		"\n"
-	"		OUT %[portout], %[upreg]"		"\n"
-	"		NOP"		"\n"
-	"		SBIW %[bytes], 1"		"\n"
-	"		BREQ Hx116"		"\n"
-	"		LSL __tmp_reg__"		"\n"
-	"		BRCS P1x18"		"\n"
-	"		RJMP P0x19"		"\n"
-	"Mx108:	NOP"		"\n"
-	"		OUT %[portout], %[downreg]"		"\n"
-	"		RJMP XX13"		"\n"
-	"XX13:	OUT %[portout], %[upreg]"		"\n"
-	"		RJMP XX9"		"\n"
-	"XX9:	RJMP XX10"		"\n"
-	"XX10:	LSL __tmp_reg__"		"\n"
-	"		BRCS P1x18"		"\n"
-	"		RJMP P0x19"		"\n"
-	"Hx116:	RJMP XX11"		"\n"
-	"XX11:	NOP"		"\n"
-	"		OUT %[portout], %[downreg]"		"\n"
-	"		RJMP XX12"		"\n"
-	"XX12:	OUT %[portout], %[upreg]"		"\n"
-	"		RJMP END"		"\n"
-	"END:	"		"\n"
+    		"start:  LD __tmp_reg__, %a[dataptr]+            \n"
+    		"s00:    OUT %[portout], %[upreg]                \n"
+    		"        LSL __tmp_reg__                         \n"
+    		"        BRCS skip04                             \n"
+    		"        OUT %[portout], %[downreg]              \n"
+    		"skip04: RJMP brk0                               \n"
+    		"brk0:   SUBI %[bits], 1                         \n"
+    		"        BRNE cont09                             \n"
+    		"        LDI %[bits], 7                          \n"
+    		"        OUT %[portout], %[downreg]              \n"
+    		"        RJMP brk10                              \n"
+    		"cont09: OUT %[portout], %[downreg]              \n"
+    		"        RJMP s00                                \n"
+    		"brk10:  OUT %[portout], %[upreg]                \n"
+    		"        LSL __tmp_reg__                         \n"
+    		"        BRCS skip14                             \n"
+    		"        OUT %[portout], %[downreg]              \n"
+    		"skip14: NOP                                     \n"
+    		"        LD __tmp_reg__, %a[dataptr]+            \n"
+    		"        SBIW %[bytes], 1                        \n"
+    		"        OUT %[portout], %[downreg]              \n"
+    		"        BRNE s00                                \n"
+    		"        NOP                                     \n"
+    		"end:    OUT %[portout], %[upreg]                \n"
 
 : /* no output */
 : /* inputs */
@@ -241,9 +162,9 @@ inline void clear( sparse_leds<buffer_size, led_string_size> &leds)
  *
  * This function is deliberately not implemented as an operator[] of sparse_leds, because
  * using an explicit function call makes it clear that code is being run and that it is
- * worthwhile to store the result of this function instead of calling the functioni twice.
- * Measurements have shown that the compiler will not optimize a second call to this function with
- * the same arguments out of the code.
+ * worthwhile to store the result of this function instead of calling the function twice.
+ * Measurements have shown that the compiler will not memoize a second call to this function with
+ * the same arguments.
  */
 template<uint8_t buffer_size, uint8_t led_string_size>
 rgb & get( sparse_leds<buffer_size, led_string_size> &leds, uint8_t position)
@@ -334,12 +255,14 @@ void send_sparse( const void *buffer, uint8_t bit )
     _delay_loop_1(384/3); // 40us = 384 ticks, 3 ticks per loop
 
     // note: the labels in this piece of assembly code aren't very explanatory. The real documentation
-    // of this code can be found in the spreadsheet ws2811@9.6Mhz.ods, in the tab "sparse"
-    // The ordrer of the blocks of code have been determined by arrange_timed_code.cpp
+    // of this code can be found in the spreadsheet ws2811@9.6Mhz.ods, in the tab "compact 9.6"
+    // The order of the blocks of code have been determined by arrange_timed_code.cpp
+    // Do note that if a label ends with a double digit (e.g. "cont09"), those last digits represent
+    // the phase of the waveform that the code at that label position is in.
     asm volatile(
     		"start:  LDI %[bits], 23                         \n"
     		"        LD %[data], %a[dataptr]+                \n"
-    		"        TST %[data]                     \n"
+    		"        TST %[data]                             \n"
     		"        BRNE z00                                \n"
     		"        LDI %[bits], 7                          \n"
     		"        RJMP z11                                \n"
@@ -358,33 +281,33 @@ void send_sparse( const void *buffer, uint8_t bit )
     		"        OUT %[portout], %[downreg]              \n"
     		"        RJMP brk1                               \n"
     		"brk1:   OUT %[portout], %[upreg]                \n"
-    		"        LSL %[data]                         \n"
+    		"        LSL %[data]                             \n"
     		"        BRCS skip14                             \n"
     		"        OUT %[portout], %[downreg]              \n"
     		"skip14: RJMP brk2                               \n"
-    		"brk2:   LD %[data], %a[dataptr]+            \n"
+    		"brk2:   LD %[data], %a[dataptr]+                \n"
     		"        SUBI %[bytes], 1                        \n"
     		"        OUT %[portout], %[downreg]              \n"
     		"        BRNE s00                                \n"
     		"        LDI %[bits], 23                         \n"
     		"z00:    OUT %[portout], %[upreg]                \n"
-    		"        TST %[data]             \n"
+    		"        TST %[data]                             \n"
     		"        BREQ end                                \n"
     		"        OUT %[portout], %[downreg]              \n"
     		"        RJMP brk3                               \n"
     		"brk3:   SUBI %[bits], 1                         \n"
     		"        BRNE zcont09                            \n"
-    		"        SUBI %[data], 1                     \n"
+    		"        SUBI %[data], 1                         \n"
     		"        LDI %[bits], 24                         \n"
     		"        BRNE z00                                \n"
     		"        LDI %[bits], 7                          \n"
     		"        OUT %[portout], %[upreg]                \n"
-    		"z11:    LD %[data], %a[dataptr]+            \n"
+    		"z11:    LD %[data], %a[dataptr]+                \n"
     		"        OUT %[portout], %[downreg]              \n"
-    		"        MOV %[bytes], %[data]               \n"
-    		"        ADD %[bytes], %[data]               \n"
-    		"        ADD %[bytes], %[data]               \n"
-    		"        LD %[data], %a[dataptr]+            \n"
+    		"        MOV %[bytes], %[data]                   \n"
+    		"        ADD %[bytes], %[data]                   \n"
+    		"        ADD %[bytes], %[data]                   \n"
+    		"        LD %[data], %a[dataptr]+                \n"
     		"        BREQ z1b                                \n"
     		"        RJMP s00                                \n"
     		"z1b:    NOP                                     \n"
