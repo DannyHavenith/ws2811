@@ -19,7 +19,7 @@ using ws2811::rgb;
 uint16_t my_rand()
 {
 	static uint16_t state;
-	return state += 33201; // adding a prime number
+	return state += 33203; // adding a prime number
 }
 
 template< typename buffer_type, typename pos_type = uint16_t>
