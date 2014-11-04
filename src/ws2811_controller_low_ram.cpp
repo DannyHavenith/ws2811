@@ -25,7 +25,6 @@ namespace {
 	chaser_type chasers_array[] = {
 			chaser_type( rgb( 50, 75, 15), 0),
 			chaser_type( rgb( 50, 15, 75), -30),
-//			chaser_type( rgb( 255, 0,0), 50)
 	};
 
 	inline void chasers()

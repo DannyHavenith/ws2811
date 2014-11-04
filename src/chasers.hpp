@@ -9,11 +9,16 @@
 #define CHASERS_HPP_
 #include <stdlib.h>
 #include <util/delay.h>
+#include <avr/pgmspace.h>
 #include "ws2811.h"
 using ws2811::rgb;
 
 namespace
 {
+
+static const uint16_t amplitudes[] PROGMEM = {
+		256, 200, 150, 100, 80, 60, 50, 40, 30, 20, 10, 5, 4, 3, 2, 1
+};
 }
 
 /**
@@ -52,12 +57,12 @@ public:
 	{
 		static const uint8_t size = ws2811::led_buffer_traits<buffer_type>::count;
 		pos_type pos = position;
-		uint16_t amplitude = 256-256/tail_count + 4;
-		for (uint8_t count = tail_count; count ; --count)
+		const uint16_t *amplitude_ptr = &amplitudes[0];
+		while (amplitude_ptr < &amplitudes[sizeof amplitudes/sizeof amplitudes[0]])
 		{
 			rgb &loc = get(leds, abs( pos));
-			loc = add_clipped( loc, scale( color, amplitude));
-			amplitude -= 256/tail_count;
+			loc = add_clipped( loc, scale( color,  pgm_read_byte(*amplitude_ptr)));
+			amplitude_ptr += (sizeof amplitudes/sizeof amplitudes[0])/ tail_count;
 			--pos;
 			if( pos == -size)
 			{

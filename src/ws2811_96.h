@@ -46,32 +46,34 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
     WS2811_PORT = low_val;
     _delay_loop_1( 384/3); // 40us = 384 ticks, 3 ticks per loop
 
-    // The real documentation of this code can be found in the spreadsheet ws2811@9.6Mhz.ods
-    // in the tab with name "reduced footprint  9.6".
-    // Jumps to labels of the form brknn are there to have single instruction words that take 2 cycles
+    // The documentationof this code, including a graphical representation of the waveform
+    // can be found in the spreadsheet ws2811@9.6Mhz.ods, in the tab "reduced footprint  9.6"
+    // Note that if a label ends with a double digit (e.g. "cont09"), those last digits represent
+    // the phase of the waveform that the code at that label position is in.
+    // Jumps to labels of the form spbrknn are there to have single instruction words that take 2 cycles
     asm volatile(
     		"spstart:  LD __tmp_reg__, %a[dataptr]+            \n"
-    		"sps00:    OUT %[portout], %[upreg]                \n"
-    		"          LSL __tmp_reg__                         \n"
-    		"          BRCS spskip04                           \n"
-    		"          OUT %[portout], %[downreg]              \n"
+    		"sps00:    OUT %[portout], %[upreg]                \n" //    at this point the bits are in '__tmp_reg__'
+    		"          LSL __tmp_reg__                         \n" //    get leftmost of the remaining bits
+    		"          BRCS spskip04                           \n" //    skip the next instruction if it is 1
+    		"          OUT %[portout], %[downreg]              \n" //    pull the line down if it was a zero
     		"spskip04: RJMP spbrk0                             \n"
-    		"spbrk0:   SUBI %[bits], 1                         \n"
-    		"          BRNE spcont09                           \n"
-    		"          LDI %[bits], 7                          \n"
-    		"          OUT %[portout], %[downreg]              \n"
+    		"spbrk0:   SUBI %[bits], 1                         \n" //    decrease bit counter...
+    		"          BRNE spcont09                           \n" //    ...and make sure we loop if it's not zero yet
+    		"          LDI %[bits], 7                          \n" //    bitcounter was zero, reset to 7
+    		"          OUT %[portout], %[downreg]              \n" //    has no effect if the line was already down
     		"          RJMP spbrk10                            \n"
     		"spcont09: OUT %[portout], %[downreg]              \n"
     		"          RJMP sps00                              \n"
     		"spbrk10:  OUT %[portout], %[upreg]                \n"
-    		"          LSL __tmp_reg__                         \n"
+    		"          LSL __tmp_reg__                         \n" //    get the final bit
     		"          BRCS spskip14                           \n"
     		"          OUT %[portout], %[downreg]              \n"
     		"spskip14: NOP                                     \n"
-    		"          LD __tmp_reg__, %a[dataptr]+            \n"
-    		"          SBIW %[bytes], 1                        \n"
+    		"          LD __tmp_reg__, %a[dataptr]+            \n" //    load either next data byte or zero count
+    		"          SBIW %[bytes], 1                        \n" //    do we need to send another byte?
     		"          OUT %[portout], %[downreg]              \n"
-    		"          BRNE sps00                              \n"
+    		"          BRNE sps00                              \n" //    jump to the start if we do.
     		"          NOP                                     \n"
     		"spend:    OUT %[portout], %[upreg]                \n"
 
@@ -254,61 +256,61 @@ void send_sparse( const void *buffer, uint8_t bit )
     WS2811_PORT = low_val;
     _delay_loop_1(384/3); // 40us = 384 ticks, 3 ticks per loop
 
-    // note: the labels in this piece of assembly code aren't very explanatory. The real documentation
-    // of this code can be found in the spreadsheet ws2811@9.6Mhz.ods, in the tab "compact 9.6"
-    // The order of the blocks of code have been determined by arrange_timed_code.cpp
-    // Do note that if a label ends with a double digit (e.g. "cont09"), those last digits represent
+    // The documentation of this code, including a graphical representation of the waveform
+    // can be found in the spreadsheet ws2811@9.6Mhz.ods, in the tab "compact 9.6"
+    // Note that if a label ends with a double digit (e.g. "cont09"), those last digits represent
     // the phase of the waveform that the code at that label position is in.
+    // Jumps to labels of the form brk<n> are there to have single instruction words that take 2 cycles
     asm volatile(
     		"start:  LDI %[bits], 23                         \n"
-    		"        LD %[data], %a[dataptr]+                \n"
-    		"        TST %[data]                             \n"
-    		"        BRNE z00                                \n"
-    		"        LDI %[bits], 7                          \n"
+    		"        LD %[data], %a[dataptr]+                \n" //    read how many zero-leds we need to transmit
+    		"        TST %[data]                             \n" //
+    		"        BRNE z00                                \n" //    Jump to the zero routine
+    		"        LDI %[bits], 7                          \n" //
     		"        RJMP z11                                \n"
     		"cont09: OUT %[portout], %[downreg]              \n"
     		"        RJMP s00                                \n"
     		"zcont09:NOP                                     \n"
     		"        RJMP z00                                \n"
-    		"s00:    OUT %[portout], %[upreg]                \n"
-    		"        LSL %[data]                             \n"
-    		"        BRCS skip04                             \n"
-    		"        OUT %[portout], %[downreg]              \n"
-    		"skip04: RJMP brk0                               \n"
-    		"brk0:   SUBI %[bits], 1                         \n"
-    		"        BRNE cont09                             \n"
-    		"        LDI %[bits], 7                          \n"
-    		"        OUT %[portout], %[downreg]              \n"
-    		"        RJMP brk1                               \n"
-    		"brk1:   OUT %[portout], %[upreg]                \n"
-    		"        LSL %[data]                             \n"
+    		"s00:    OUT %[portout], %[upreg]                \n" //    at this point the bits are in '[data]'
+    		"        LSL %[data]                             \n" //    get leftmost of the remaining bits
+    		"        BRCS skip04                             \n" //    skip the next instruction if it is 1
+    		"        OUT %[portout], %[downreg]              \n" //    pull the line down if it was a zero
+    		"skip04: RJMP brk0                               \n" //
+    		"brk0:   SUBI %[bits], 1                         \n" //    decrease bit counter...
+    		"        BRNE cont09                             \n" //    ...and make sure we loop if it's not zero yet
+    		"        LDI %[bits], 7                          \n" //    bitcounter was zero, reset to 7
+    		"        OUT %[portout], %[downreg]              \n" //    has no effect if the line was already down
+    		"        RJMP brk1                               \n" //
+    		"brk1:   OUT %[portout], %[upreg]                \n" //
+    		"        LSL %[data]                             \n" //    get the final bit
     		"        BRCS skip14                             \n"
-    		"        OUT %[portout], %[downreg]              \n"
-    		"skip14: RJMP brk2                               \n"
-    		"brk2:   LD %[data], %a[dataptr]+                \n"
-    		"        SUBI %[bytes], 1                        \n"
-    		"        OUT %[portout], %[downreg]              \n"
-    		"        BRNE s00                                \n"
-    		"        LDI %[bits], 23                         \n"
-    		"z00:    OUT %[portout], %[upreg]                \n"
-    		"        TST %[data]                             \n"
-    		"        BREQ end                                \n"
-    		"        OUT %[portout], %[downreg]              \n"
-    		"        RJMP brk3                               \n"
-    		"brk3:   SUBI %[bits], 1                         \n"
-    		"        BRNE zcont09                            \n"
-    		"        SUBI %[data], 1                         \n"
-    		"        LDI %[bits], 24                         \n"
-    		"        BRNE z00                                \n"
-    		"        LDI %[bits], 7                          \n"
-    		"        OUT %[portout], %[upreg]                \n"
-    		"z11:    LD %[data], %a[dataptr]+                \n"
-    		"        OUT %[portout], %[downreg]              \n"
-    		"        MOV %[bytes], %[data]                   \n"
-    		"        ADD %[bytes], %[data]                   \n"
-    		"        ADD %[bytes], %[data]                   \n"
-    		"        LD %[data], %a[dataptr]+                \n"
-    		"        BREQ z1b                                \n"
+    		"        OUT %[portout], %[downreg]              \n" //
+    		"skip14: RJMP brk2                               \n" //
+    		"brk2:   LD %[data], %a[dataptr]+                \n" //    load either next [data] byte or zero count
+    		"        SUBI %[bytes], 1                        \n" //    do we need to send another byte?
+    		"        OUT %[portout], %[downreg]              \n" //
+    		"        BRNE s00                                \n" //    jump to the start if we do.
+    		"        LDI %[bits], 23                         \n" //    prepare for sending 24 bits of zero data
+    		"z00:    OUT %[portout], %[upreg]                \n" //
+    		"        TST %[data]                             \n" //    check how many zeros we have to send
+    		"        BREQ end                                \n" //    jump out if it there are none to send.
+    		"        OUT %[portout], %[downreg]              \n" //
+    		"        RJMP brk3                               \n" //
+    		"brk3:   SUBI %[bits], 1                         \n" //
+    		"        BRNE zcont09                            \n" //
+    		"        SUBI %[data], 1                         \n" //    [data] actually contains 'byte' count (in 3 bytes units)
+    		"        LDI %[bits], 24                         \n" //    24, because we are not falling into the lower half
+    		"        BRNE z00                                \n" //
+    		"        LDI %[bits], 7                          \n" //
+    		"        OUT %[portout], %[upreg]                \n" //
+    		"z11:    LD %[data], %a[dataptr]+                \n" //    read the number of leds
+    		"        OUT %[portout], %[downreg]              \n" //
+    		"        MOV %[bytes], %[data]                   \n" //    multiply by three
+    		"        ADD %[bytes], %[data]                   \n" //
+    		"        ADD %[bytes], %[data]                   \n" //
+    		"        LD %[data], %a[dataptr]+                \n" //    read the first byte
+    		"        BREQ z1b                                \n" //    but jump out if the byte count was zero...
     		"        RJMP s00                                \n"
     		"z1b:    NOP                                     \n"
     		"end:    OUT %[portout], %[upreg]                \n"
