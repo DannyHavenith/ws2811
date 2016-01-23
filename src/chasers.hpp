@@ -16,8 +16,8 @@ using ws2811::rgb;
 namespace
 {
 
-static const uint16_t amplitudes[] PROGMEM = {
-		256, 200, 150, 100, 80, 60, 50, 40, 30, 20, 10, 5, 4, 3, 2, 1
+static const uint8_t amplitudes[] PROGMEM = {
+		255, 200, 150, 100, 80, 60, 50, 40, 30, 20, 10, 5, 4, 3, 2, 1
 };
 }
 
@@ -58,11 +58,11 @@ public:
 		static const uint8_t size = ws2811::led_buffer_traits<buffer_type>::count;
 		static const uint8_t amplitude_count = sizeof amplitudes/sizeof amplitudes[0];
 		pos_type pos = position;
-		uint8_t accumulator = 0;
+		uint16_t accumulator = 0;
 		while (accumulator/tail_count < amplitude_count)
 		{
 			rgb &loc = get(leds, abs( pos));
-			loc = add_clipped( loc, scale( color,  pgm_read_byte(amplitudes[accumulator/tail_count])));
+			loc = add_clipped( loc, scale( color,  pgm_read_byte(&amplitudes[accumulator/tail_count])));
 			accumulator += amplitude_count;
 			--pos;
 			if( pos == -size)
