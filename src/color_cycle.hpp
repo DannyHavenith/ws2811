@@ -28,7 +28,7 @@ void animate( const ws2811::rgb &new_value, ws2811::rgb (&leds)[led_count], uint
 {
     scroll( new_value, leds);
     send( leds, channel);
-    _delay_ms( 100);
+    _delay_ms( 40);
 }
 
 template<uint8_t count, uint16_t led_count>

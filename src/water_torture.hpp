@@ -34,18 +34,15 @@ namespace water_torture
 	///      while a part of the drop remains on the ground.
 	/// After going through the swelling, falling and bouncing phases, the droplet automatically returns to the
 	/// inactive state.
-	template<typename buffer_type>
+	template<typename buffer_type, bool allow_swelling = true>
 	class droplet
 	{
 	public:
-		droplet( const rgb &color, uint16_t gravity)
-		:color( color), position(0), speed(0),
-		 gravity( gravity), state(swelling)
+		droplet( const rgb &color)
+		:color( color), position(0), speed(0),state(allow_swelling?swelling:falling)
 		{}
 
-		droplet()
-		:color(0,0,0), position(0), speed(0),
-		 gravity(0), state( inactive)
+		droplet() // by default, be uninitialized
 		{
 
 		}
@@ -79,7 +76,7 @@ namespace water_torture
 					}
 				}
 			}
-			else if (state == swelling)
+			else if (allow_swelling && state == swelling)
 			{
 				++position;
 				if ( color.blue <= 10 || color.blue - position <= 10)
@@ -122,7 +119,7 @@ namespace water_torture
 					add_clipped_to( get( leds, max_pos), color);
 				}
 			}
-			else if (state == swelling)
+			else if (allow_swelling && state == swelling)
 			{
 				add_clipped_to( get( leds, 0), scale( color, position));
 			}
@@ -174,7 +171,7 @@ private:
 		rgb 	 color;
 		uint16_t position;
 		int16_t  speed;
-		uint16_t gravity;
+		static const uint16_t gravity = 5;
 		enum stateval {
 			inactive,
 			swelling,
@@ -191,15 +188,15 @@ private:
 		return (my_rand() % 256);
 	}
 
-	template< typename buffer_type>
-	void create_random_droplet( droplet<buffer_type> &d)
+	template< typename buffer_type, bool allow_swelling>
+	void create_random_droplet( droplet<buffer_type, allow_swelling> &d)
 	{
-		d = droplet<buffer_type>(
+		d = droplet<buffer_type, allow_swelling>(
 				rgb(
 						mult( 100 ,random_scale()),
 						mult( 100, random_scale()),
 						mult(255, random_scale())
-						), 5);
+						));
 	}
 
 	template<bool assertion>
@@ -214,8 +211,8 @@ private:
 	/// Create the complete water torture animation.
 	/// This will render droplets at random intervals, up to a given maximum number of droplets.
 	/// The maximum led count is 256
-	template< uint8_t droplet_count = 2, typename buffer_type>
-	void animate( buffer_type &leds, uint8_t channel)
+	template< uint8_t droplet_count, typename buffer_type>
+	void inline animate( buffer_type &leds, uint8_t channel)
 	{
 		static const uint16_t led_count = ws2811::led_buffer_traits<buffer_type>::count;
 
@@ -223,7 +220,7 @@ private:
 	    // more than 255 leds, which doesn't work for this function.
 	    static_assert_< led_count <= 255>::is_true();
 
-	    typedef droplet<buffer_type> droplet_type;
+	    typedef droplet<buffer_type, false> droplet_type;
 	    droplet_type droplets[droplet_count]; // droplets that can animate simultaneously.
 	    uint8_t current_droplet = 0; // index of the next droplet to be created
 	    uint8_t droplet_pause = 1; // how long to wait for the next one

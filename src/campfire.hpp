@@ -25,6 +25,7 @@ namespace {
 	/// flame color pattern. This pattern is twice as big as the pattern that is actually drawn to allow
 	/// anti-aliasing when rendering.
 	const ws2811::rgb pattern[] = {
+			rgb(2,0,0), rgb(8,0,0), rgb(15, 0,0 ),
 			rgb( 20, 0, 0), 	rgb( 50, 0, 0),
 			rgb( 80, 0, 0), 	rgb( 100, 20, 0),
 			rgb( 120, 40, 0), 	rgb( 120, 60, 5),
@@ -33,7 +34,8 @@ namespace {
 			rgb( 120, 80, 10), 	rgb( 120, 60, 5),
 			rgb( 120, 40, 0), 	rgb( 100, 20, 0),
 			rgb( 80, 0, 0), 	rgb( 50, 0, 0),
-			rgb( 20, 0, 0),
+			rgb( 20, 0, 0),	    rgb( 15, 0, 0),
+			rgb( 8, 0, 0), rgb( 2, 0,0)
 	};
 	const uint8_t pattern_size = sizeof pattern/sizeof pattern[0];
 }
@@ -53,11 +55,11 @@ public:
 
 	void step( rgb *leds, uint16_t size)
 	{
-		if ((rand()&1) && position > 0)
+		if (((rand()&7)==0) && position > 0)
 		{
 			position--;
 		}
-		if ((rand()&1) && ((position + pattern_size) < size*2))
+		if (((rand()&7)==0) && ((position + pattern_size) < size*2))
 		{
 			position++;
 		}
@@ -90,7 +92,7 @@ private:
 template< uint16_t size>
 void campfire( rgb (&leds)[size], uint8_t channel)
 {
-	static const uint8_t flamecount = 10;
+	static const uint8_t flamecount = size/10;
 	flame flames[flamecount];
 	const uint16_t step = (size - pattern_size)/flamecount;
 	for (uint16_t pos = 0; pos < flamecount; ++pos)

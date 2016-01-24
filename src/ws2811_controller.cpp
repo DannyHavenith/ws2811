@@ -23,30 +23,43 @@
 #include <util/delay.h>
 #include <stdlib.h>
 
-#define WS2811_PORT PORTB
+// Define the port at which the signal will be sent. The port needs to
+// be known at compilation time, the pin (0-7) can be chosen at run time.
+#define WS2811_PORT PORTC
+
+// send RGB in R,G,B order instead of the standard WS2811 G,R,B order.
+// YOU TYPICALLY DO NOT WANT TO DEFINE THIS SYMBOL!
+// It's just that one led string I encountered had R,G,B wired in the "correct" order.
+//#define STRAIGHT_RGB
 
 #include "chasers.hpp"
-//#include "flares.hpp"
-//#include "color_cycle.hpp"
-//#include "water_torture.hpp"
-//#include "campfire.hpp"
+#include "flares.hpp"
+#include "color_cycle.hpp"
+#include "water_torture.hpp"
+#include "campfire.hpp"
+
 namespace {
 
-static const uint8_t channel = 5;
-static const uint16_t led_count = 60;
+// selects the pin (the bit of the chosen port).
+// this must be in the range 0-7
+static const uint8_t 	channel = 4;
 
+// the number of LEDs in the string.
+static const uint16_t 	led_count = 50;
+
+// declare one RGB value for each led.
 ws2811::rgb leds[led_count];
-
 }
+
 int main()
 {
-    DDRB = _BV(channel);
+    DDRC = _BV(channel);
+
+
     //campfire( leds, channel);
-    //water_torture::animate( leds, channel);
-    //flares::flares( channel);
+    //water_torture::animate<3>( leds, channel);
+    //flares::flares<10>( leds, channel);
     chasers( leds, channel);
-    //color_cycle::example_color_cycle( 5);
-    //chasers( channel);
-    //color_cycle::example_color_cycle( 5);
+    //color_cycle::color_cycle(pattern, leds, channel);
 
 }
