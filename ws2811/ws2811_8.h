@@ -15,7 +15,7 @@
 #include <avr/io.h>
 #include <util/delay_basic.h>
 
-#include "../ws2811/rgb.h"
+#include "rgb.h"
 
 namespace ws2811
 {
@@ -77,8 +77,8 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
     		"        LD __tmp_reg__, %a[dataptr]+            \n"
     		"        BRNE cont09                             \n" // Loop if byte count is not zero
     		"brk18:  OUT %[portout], %[downreg]              \n"
-    		"        NOP                                     \n"
-    		"end:    OUT %[portout], %[upreg]                \n" // We're done.
+    		"                                                \n" // used to be a NOP here, but returning from the function takes long enough
+    		"                                                \n" // We're done.
 : /* no output */
 : /* inputs */
 [dataptr] "e" (values), 	// pointer to grb values

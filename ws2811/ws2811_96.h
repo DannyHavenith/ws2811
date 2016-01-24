@@ -75,7 +75,7 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
     		"          OUT %[portout], %[downreg]              \n"
     		"          BRNE sps00                              \n" //    jump to the start if we do.
     		"          NOP                                     \n"
-    		"spend:    OUT %[portout], %[upreg]                \n"
+    		"spend:    OUT %[portout], %[downreg]              \n"
 
 : /* no output */
 : /* inputs */
