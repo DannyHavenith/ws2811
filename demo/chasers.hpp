@@ -10,7 +10,8 @@
 #include <stdlib.h>
 #include <util/delay.h>
 #include <avr/pgmspace.h>
-#include "ws2811.h"
+
+#include "ws2811/ws2811.h"
 using ws2811::rgb;
 
 namespace

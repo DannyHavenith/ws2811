@@ -25,16 +25,25 @@
 							<builder buildPath="${workspace_loc:/ws2811_controller/Debug}" id="de.innot.avreclipse.target.builder.winavr.app.debug.850589406" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="AVR GNU Make Builder" superClass="de.innot.avreclipse.target.builder.winavr.app.debug"/>
 							<tool id="de.innot.avreclipse.tool.assembler.winavr.app.debug.150678768" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.app.debug">
 								<option id="de.innot.avreclipse.assembler.option.debug.level.1414391650" name="Generate Debugging Info" superClass="de.innot.avreclipse.assembler.option.debug.level"/>
+								<option id="de.innot.avreclipse.asm.option.include.paths.2141806878" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ws2811_controller}&quot;"/>
+								</option>
 								<inputType id="de.innot.avreclipse.tool.assembler.input.1492361811" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.602930853" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug">
 								<option id="de.innot.avreclipse.compiler.option.debug.level.1296016479" name="Generate Debugging Info" superClass="de.innot.avreclipse.compiler.option.debug.level"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.849587268" name="Optimization Level" superClass="de.innot.avreclipse.compiler.option.optimize"/>
+								<option id="de.innot.avreclipse.compiler.option.incpath.48886870" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ws2811_controller}&quot;"/>
+								</option>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.1633665334" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.cppcompiler.app.debug.430442102" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.debug">
 								<option id="de.innot.avreclipse.cppcompiler.option.debug.level.269995740" name="Generate Debugging Info" superClass="de.innot.avreclipse.cppcompiler.option.debug.level"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.215679665" name="Optimization Level" superClass="de.innot.avreclipse.cppcompiler.option.optimize"/>
+								<option id="de.innot.avreclipse.cppcompiler.option.incpath.1984256621" superClass="de.innot.avreclipse.cppcompiler.option.incpath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ws2811_controller}&quot;"/>
+								</option>
 								<inputType id="de.innot.avreclipse.cppcompiler.input.1089147345" superClass="de.innot.avreclipse.cppcompiler.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.linker.winavr.app.debug.75586436" name="AVR C Linker" superClass="de.innot.avreclipse.tool.linker.winavr.app.debug"/>
@@ -80,16 +89,25 @@
 							<builder buildPath="${workspace_loc:/ws2811_controller/Release}" id="de.innot.avreclipse.target.builder.winavr.app.release.1946185009" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="AVR GNU Make Builder" superClass="de.innot.avreclipse.target.builder.winavr.app.release"/>
 							<tool id="de.innot.avreclipse.tool.assembler.winavr.app.release.37840391" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.app.release">
 								<option id="de.innot.avreclipse.assembler.option.debug.level.1900081333" name="Generate Debugging Info" superClass="de.innot.avreclipse.assembler.option.debug.level" value="de.innot.avreclipse.assembler.option.debug.level.none" valueType="enumerated"/>
+								<option id="de.innot.avreclipse.asm.option.include.paths.1958626187" name="#include paths for preprocessor(-I)" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ws2811_controller}&quot;"/>
+								</option>
 								<inputType id="de.innot.avreclipse.tool.assembler.input.484496488" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.compiler.winavr.app.release.610379148" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.release">
 								<option id="de.innot.avreclipse.compiler.option.debug.level.1878754300" name="Generate Debugging Info" superClass="de.innot.avreclipse.compiler.option.debug.level" value="de.innot.avreclipse.compiler.option.debug.level.none" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.985620262" name="Optimization Level" superClass="de.innot.avreclipse.compiler.option.optimize" value="de.innot.avreclipse.compiler.optimize.size" valueType="enumerated"/>
+								<option id="de.innot.avreclipse.compiler.option.incpath.1624379984" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ws2811_controller}&quot;"/>
+								</option>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.371203006" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.cppcompiler.app.release.2084711765" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.release">
 								<option id="de.innot.avreclipse.cppcompiler.option.debug.level.1457255653" name="Generate Debugging Info" superClass="de.innot.avreclipse.cppcompiler.option.debug.level" value="de.innot.avreclipse.cppcompiler.option.debug.level.none" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.413082321" name="Optimization Level" superClass="de.innot.avreclipse.cppcompiler.option.optimize" value="de.innot.avreclipse.cppcompiler.optimize.size" valueType="enumerated"/>
+								<option id="de.innot.avreclipse.cppcompiler.option.incpath.1499660247" name="Include Paths (-I)" superClass="de.innot.avreclipse.cppcompiler.option.incpath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ws2811_controller}&quot;"/>
+								</option>
 								<inputType id="de.innot.avreclipse.cppcompiler.input.1483782427" superClass="de.innot.avreclipse.cppcompiler.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.linker.winavr.app.release.1718546576" name="AVR C Linker" superClass="de.innot.avreclipse.tool.linker.winavr.app.release"/>
@@ -107,11 +125,13 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.release.1932315512" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.release"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="de.innot.avreclipse.configuration.app.release.1041163779.492424652" name="ws2811_controller.cpp" rcbsApplicability="disable" resourcePath="src/ws2811_controller.cpp" toolsToInvoke="de.innot.avreclipse.tool.cppcompiler.app.release.2084711765.1373499791">
-						<tool id="de.innot.avreclipse.tool.cppcompiler.app.release.2084711765.1373499791" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.release.2084711765"/>
+					<fileInfo id="de.innot.avreclipse.configuration.app.release.1041163779.1319341855" name="ws2811_controller_low_ram.cpp" rcbsApplicability="disable" resourcePath="demo/ws2811_controller_low_ram.cpp" toolsToInvoke="de.innot.avreclipse.tool.cppcompiler.app.release.2084711765.363674960">
+						<tool id="de.innot.avreclipse.tool.cppcompiler.app.release.2084711765.363674960" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.release.2084711765">
+							<inputType id="de.innot.avreclipse.cppcompiler.input.1827001105" superClass="de.innot.avreclipse.cppcompiler.input"/>
+						</tool>
 					</fileInfo>
 					<sourceEntries>
-						<entry excluding="src/ws2811_controller.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="demo/ws2811_controller_low_ram.cpp|src/ws2811_controller_low_ram.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -122,21 +142,6 @@
 		<project id="ws2811_controller.de.innot.avreclipse.project.winavr.elf_2.1.0.1301933097" name="AVR Cross Target Application" projectType="de.innot.avreclipse.project.winavr.elf_2.1.0"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.1041163779;de.innot.avreclipse.configuration.app.release.1041163779.;de.innot.avreclipse.tool.cppcompiler.app.release.2084711765;de.innot.avreclipse.cppcompiler.input.1483782427">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileCPP"/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.513372145;de.innot.avreclipse.configuration.app.debug.513372145.;de.innot.avreclipse.tool.cppcompiler.app.debug.430442102;de.innot.avreclipse.cppcompiler.input.1089147345">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileCPP"/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.1041163779;de.innot.avreclipse.configuration.app.release.1041163779.;de.innot.avreclipse.tool.compiler.winavr.app.release.610379148;de.innot.avreclipse.compiler.winavr.input.371203006">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.513372145;de.innot.avreclipse.configuration.app.debug.513372145.;de.innot.avreclipse.tool.compiler.winavr.app.debug.602930853;de.innot.avreclipse.compiler.winavr.input.1633665334">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
-		</scannerConfigBuildInfo>
-	</storageModule>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/ws2811_controller"/>
@@ -144,5 +149,20 @@
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/ws2811_controller"/>
 		</configuration>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.1041163779;de.innot.avreclipse.configuration.app.release.1041163779.;de.innot.avreclipse.tool.compiler.winavr.app.release.610379148;de.innot.avreclipse.compiler.winavr.input.371203006">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.1041163779;de.innot.avreclipse.configuration.app.release.1041163779.;de.innot.avreclipse.tool.cppcompiler.app.release.2084711765;de.innot.avreclipse.cppcompiler.input.1483782427">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileCPP"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.513372145;de.innot.avreclipse.configuration.app.debug.513372145.;de.innot.avreclipse.tool.cppcompiler.app.debug.430442102;de.innot.avreclipse.cppcompiler.input.1089147345">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileCPP"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.513372145;de.innot.avreclipse.configuration.app.debug.513372145.;de.innot.avreclipse.tool.compiler.winavr.app.debug.602930853;de.innot.avreclipse.compiler.winavr.input.1633665334">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
 	</storageModule>
 </cproject>

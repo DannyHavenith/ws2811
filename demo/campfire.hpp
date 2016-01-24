@@ -16,10 +16,10 @@
 
 #ifndef CAMPFIRE_HPP_
 #define CAMPFIRE_HPP_
-#include "ws2811.h"
-#include "rgb_operators.hpp"
-
 #include <string.h> // for memset
+
+#include "ws2811/rgb_operators.hpp"
+#include "ws2811/ws2811.h"
 namespace {
 	using ws2811::rgb;
 	/// flame color pattern. This pattern is twice as big as the pattern that is actually drawn to allow

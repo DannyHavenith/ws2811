@@ -28,9 +28,9 @@ struct led_buffer_traits
 #endif
 
 #if (F_CPU == 8000000)
-#   include "ws2811_8.h"
+#   include "../ws2811/ws2811_8.h"
 #elif (F_CPU == 9600000)
-#   include "ws2811_96.h"
+#   include "../ws2811/ws2811_96.h"
 #else
 #   error "ws2811 code works with clock frequencies of 8Mhz or 9.6Mhz only."
 #endif

@@ -30,7 +30,7 @@
 // send RGB in R,G,B order instead of the standard WS2811 G,R,B order.
 // YOU TYPICALLY DO NOT WANT TO DEFINE THIS SYMBOL!
 // It's just that one led string I encountered had R,G,B wired in the "correct" order.
-//#define STRAIGHT_RGB
+#define STRAIGHT_RGB
 
 #include "chasers.hpp"
 #include "flares.hpp"

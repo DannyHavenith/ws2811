@@ -7,8 +7,8 @@
 
 #ifndef COLOR_CYCLE_HPP_
 #define COLOR_CYCLE_HPP_
-#include "ws2811.h"
 #include <util/delay.h>
+#include "ws2811/ws2811.h"
 
 namespace color_cycle
 {

@@ -21,7 +21,7 @@
 #include <avr/io.h>
 #include <util/delay_basic.h>
 
-#include "rgb.h"
+#include "../ws2811/rgb.h"
 
 namespace ws2811
 {
