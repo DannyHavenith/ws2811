@@ -169,8 +169,8 @@ private:
 		// between 0 and 256 where 256 means no loss.
 		static const uint16_t collision_scaling = 40;
 		rgb 	 color;
-		uint16_t position;
-		int16_t  speed;
+		uint16_t position; //< position in 8.8 fixed point, 256 means at LED 1, 384 means between LEDS 1 and 2, etc.
+		int16_t  speed;    //< speed in 8.8 fixed point, 256 means 1 LED per cycle, 512 means 2 LEDs/cycle, etc.
 		static const uint16_t gravity = 5;
 		enum stateval {
 			inactive,
