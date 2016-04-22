@@ -9,3 +9,4 @@ code design is documented in [a spreadsheet](design/ws2811@8Mhz.ods?raw=true).
 A more elaborate description can be found 
 [here](http://rurandom.org/justintime/index.php?title=Driving_the_WS2811_at_800_kHz_with_an_8_MHz_AVR).
 
+This software is released under the [Boost Software License v1.0](https://github.com/DannyHavenith/ws2811/blob/master/LICENSE_1_0.txt).
