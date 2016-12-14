@@ -55,6 +55,17 @@ struct rgb
 
 };
 #endif
+bool operator==( const rgb &lhs, const rgb &rhs)
+{
+    return  lhs.red   == rhs.red &&
+            lhs.green == rhs.green &&
+            lhs.blue  == rhs.blue;
+}
+
+bool operator!=( const rgb &lhs, const rgb &rhs)
+{
+    return not (lhs == rhs);
+}
 }
 
 
