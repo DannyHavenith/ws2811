@@ -35,6 +35,15 @@ namespace ws2811
 				);
 	}
 
+	inline rgb scale( uint16_t scale, const rgb &original)
+	{
+	    return rgb(
+                (original.red * scale) >> 8,
+                (original.green * scale) >> 8,
+                (original.blue * scale) >> 8
+	            );
+	}
+
 }
 
 

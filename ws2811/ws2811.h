@@ -60,6 +60,15 @@ inline void clear( rgb (&values)[array_size])
 }
 
 template< uint16_t array_size>
+inline void fill( rgb (&values)[array_size], const rgb &value)
+{
+    for (uint16_t count = 0; count < array_size; ++count)
+    {
+        values[count] = value;
+    }
+}
+
+template< uint16_t array_size>
 struct led_buffer_traits<rgb[array_size]>
 {
 	static const uint16_t count = array_size;

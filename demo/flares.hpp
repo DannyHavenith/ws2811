@@ -41,10 +41,21 @@ public:
      * If directionFilter is zero, the lights will be written both when growing and when
      * dimming.
      */
-	void step(buffer_type &leds, int8_t directionFilter = 0)
+	void step(buffer_type &leds,
+	          const ws2811::rgb &base_color,
+	          int8_t directionFilter = 0)
 	{
-		step();
-		set(leds, directionFilter);
+	    if (speed != 0)
+	    {
+            step();
+            set(leds, base_color, directionFilter);
+	    }
+	}
+
+	void deactivate()
+	{
+	    speed = 0;
+	    amplitude = 0;
 	}
 
 	rgb      color;
@@ -61,7 +72,7 @@ private:
 		return (static_cast<uint16_t>(value) * multiplier) >> 8;
 	}
 
-	rgb calculate() const
+	rgb calculate(const ws2811::rgb &base_color) const
 	{
 		return rgb(
 				base_color.red   + mult(color.red,   amplitude),
@@ -69,12 +80,12 @@ private:
 				base_color.blue  + mult(color.blue,  amplitude));
 	}
 
-	void set(buffer_type &leds, int8_t directionFilter) const
+	void set(buffer_type &leds, const ws2811::rgb &base_color, int8_t directionFilter) const
 	{
 	    if (speed * directionFilter >= 0)
 	    {
             rgb &myled = get(leds, position);
-            myled = calculate();
+            myled = calculate( base_color);
 	    }
 	}
 
