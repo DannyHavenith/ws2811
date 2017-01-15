@@ -116,75 +116,90 @@ uint8_t random_brightness()
 	return 170 - (my_rand() % 96);
 }
 
-template<typename flare_type, typename buffer_type>
-void create_random_flare(flare_type &f, buffer_type &leds, bool onlyZeroLeds = true)
+rgb random_color()
 {
-    const uint8_t count = ws2811::led_buffer_traits<buffer_type>::count;
-	f.color = rgb(random_brightness() +10, random_brightness() / 2 - 10,
-			random_brightness()/3);
-	f.amplitude = 0;
-	f.speed = 0;
-	uint8_t tryLeds = 100;
-	while (tryLeds--)
-	{
-        f.position = (my_rand() ^ (my_rand()>>1)) % count; // not completely random.
-	    if (   (    onlyZeroLeds and get(leds, f.position) == base_color)
-	        or (not onlyZeroLeds and get(leds, f.position) != base_color))
-	    {
-	        tryLeds = 0;
-	        f.speed = ( (my_rand() & 0x07)) + 1;
-	    }
-	}
-
+    return rgb(
+            random_brightness() / 2,
+            random_brightness() / 2 - 10,
+            random_brightness() );
 }
 
-template<uint8_t flare_count, typename buffer_type>
-void flares(buffer_type &leds, uint8_t channel, uint16_t duration, int8_t direction = 0)
+template<typename flare_type>
+void create_random_flare(flare_type &f, int16_t position, const rgb &color)
+{
+    f.amplitude = 0;
+    f.speed = 0;
+
+    if (position < 0) return;
+
+    f.color = color;
+    f.speed = ( (my_rand() & 0x07)) + 1;
+    f.position = position;
+}
+
+uint16_t find_random_led( uint16_t count)
+{
+    return (my_rand() ^ (my_rand()>>1)) % count;
+}
+
+template< typename buffer_type>
+int16_t find_free_led( buffer_type &leds)
+{
+    static const uint16_t count = ws2811::led_buffer_traits< buffer_type>::count;
+    uint8_t tryLeds = 100;
+    while (tryLeds--)
+    {
+        uint16_t position = find_random_led( count);
+        if (get(leds, position) == base_color)
+        {
+            return position;
+        }
+    }
+    return -1;
+}
+
+template<typename buffer_type, uint8_t flare_count>
+void flares_step(
+        buffer_type &leds,
+        flares::flare< buffer_type, uint8_t> (&flares)[flare_count],
+        uint8_t &current_flare,
+        uint8_t &flare_pause)
 {
 
-	flare<buffer_type, uint8_t> flares[flare_count];
-	uint8_t current_flare = 0;
-	uint8_t flare_pause = 1;
+    if (flare_pause)
+    {
+        --flare_pause;
+    }
+    else
+    {
+        if (!flares[current_flare].amplitude)
+        {
+            create_random_flare( flares[current_flare], find_free_led(leds), random_color());
+            flare_pause = my_rand() % 11;
+        }
+        ++current_flare;
+    }
+    if (current_flare >= flare_count) current_flare = 0;
 
-	for (;duration;--duration)
-	{
-		if (flare_pause)
-		{
-			--flare_pause;
-		}
-		else
-		{
-			if (!flares[current_flare].amplitude)
-			{
-				create_random_flare(flares[current_flare], leds, direction >= 0);
-				flare_pause = 0;//my_rand() % 11;
-			}
-			++current_flare;
-		}
-		if (current_flare >= flare_count)
-			current_flare = 0;
-
-		for (uint8_t idx = 0; idx < flare_count; ++idx)
-		{
-			flares[idx].step(leds, direction);
-		}
-
-		send(leds, channel);
-		_delay_ms(30);
-	}
+    for (uint8_t idx = 0; idx < flare_count; ++idx)
+    {
+        flares[idx].step(leds, base_color, 0);
+    }
 }
 
 template<uint8_t flare_count, typename buffer_type>
 void flares(buffer_type &leds, uint8_t channel)
 {
-    DDRD = 255;
-    for (uint8_t counter = 0; counter < ws2811::led_buffer_traits<buffer_type>::count; ++counter)
+    flares::flare<buffer_type, uint8_t> flares[flare_count];
+    fill( leds, base_color);
+    uint8_t current_flare = 0;
+    uint8_t flare_pause = 1;
+
+    while (true)
     {
-        get( leds, counter) = base_color;
-    }
-    for (;;)
-    {
-        flares<flare_count>( leds, channel, 65535, 0);
+        flares_step( leds, flares, current_flare, flare_pause);
+        send( leds, channel);
+        _delay_ms( 30);
     }
 }
 
