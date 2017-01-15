@@ -28,8 +28,8 @@
 #define WS2811_PORT PORTC
 
 // send RGB in R,G,B order instead of the standard WS2811 G,R,B order.
-// YOU TYPICALLY DO NOT WANT TO DEFINE THIS SYMBOL!
-// It's just that one led string I encountered had R,G,B wired in the "correct" order.
+// Most ws2811 LED strips take their colors in GRB order, while some LED strings
+// take them in RGB. Default is GRB, define this symbol for RGB.
 #define STRAIGHT_RGB
 
 #include "effects/chasers.hpp"
@@ -58,8 +58,8 @@ int main()
 
     //campfire( leds, channel);
     //water_torture::animate<3>( leds, channel);
-    //flares::flares<10>( leds, channel);
-    chasers( leds, channel);
+    flares::flares<10>( leds, channel);
+    //chasers( leds, channel);
     //color_cycle::color_cycle(pattern, leds, channel);
 
 }

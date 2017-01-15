@@ -101,7 +101,7 @@ void campfire( rgb (&leds)[size], uint8_t channel)
 	}
 	for(;;)
 	{
-		memset( leds, 0, sizeof leds);
+		clear(leds);
 		for (uint8_t f = 0; f < flamecount; ++f)
 		{
 			flames[f].step( leds, size);
