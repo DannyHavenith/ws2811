@@ -32,11 +32,11 @@
 // It's just that one led string I encountered had R,G,B wired in the "correct" order.
 #define STRAIGHT_RGB
 
-#include "chasers.hpp"
-#include "flares.hpp"
-#include "color_cycle.hpp"
-#include "water_torture.hpp"
-#include "campfire.hpp"
+#include "effects/chasers.hpp"
+#include "effects/flares.hpp"
+#include "effects/color_cycle.hpp"
+#include "effects/water_torture.hpp"
+#include "effects/campfire.hpp"
 
 namespace {
 
