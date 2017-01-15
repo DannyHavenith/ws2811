@@ -23,19 +23,28 @@ uint16_t my_rand()
 	return state += 13331; // adding a prime number
 }
 
+const rgb base_color( 3, 2, 0);
+
+template <typename T>
+T max( T lhs, T rhs)
+{
+    return (lhs > rhs) ? lhs : rhs;
+}
+
 template<typename buffer_type, typename pos_type = uint16_t>
 class flare
 {
 public:
-	void step(buffer_type &leds)
+    /**
+     * If directionFilter is negative, then flares will only be written to the LED string
+     * when dimming, if directionFilter is positive then only growing flares will be written.
+     * If directionFilter is zero, the lights will be written both when growing and when
+     * dimming.
+     */
+	void step(buffer_type &leds, int8_t directionFilter = 0)
 	{
 		step();
-		set(leds);
-	}
-
-	flare()
-	//:color( 255,255,255), position(0), amplitude(0), speed(0)
-	{
+		set(leds, directionFilter);
 	}
 
 	rgb      color;
@@ -55,15 +64,18 @@ private:
 	rgb calculate() const
 	{
 		return rgb(
-				mult(color.red,   amplitude),
-				mult(color.green, amplitude),
-				mult(color.blue,  amplitude));
+				base_color.red   + mult(color.red,   amplitude),
+				base_color.green + mult(color.green, amplitude),
+				base_color.blue  + mult(color.blue,  amplitude));
 	}
 
-	void set(buffer_type &leds) const
+	void set(buffer_type &leds, int8_t directionFilter) const
 	{
-		rgb &myled = get(leds, position);
-		myled = calculate();
+	    if (speed * directionFilter >= 0)
+	    {
+            rgb &myled = get(leds, position);
+            myled = calculate();
+	    }
 	}
 
 	void step()
@@ -77,7 +89,7 @@ private:
 			if (255 - amplitude < speed)
 			{
 				amplitude = 255;
-				speed = -(speed / 2 + 1);
+				speed = -(speed);
 			}
 			else
 			{
@@ -93,27 +105,37 @@ uint8_t random_brightness()
 	return 170 - (my_rand() % 96);
 }
 
-template<typename flare_type>
-void create_random_flare(flare_type &f, uint16_t count)
+template<typename flare_type, typename buffer_type>
+void create_random_flare(flare_type &f, buffer_type &leds, bool onlyZeroLeds = true)
 {
-	f.color = rgb(random_brightness(), random_brightness(),
-			random_brightness());
+    const uint8_t count = ws2811::led_buffer_traits<buffer_type>::count;
+	f.color = rgb(random_brightness() +10, random_brightness() / 2 - 10,
+			random_brightness()/3);
 	f.amplitude = 0;
-	f.position = (my_rand() ^ (my_rand()>>1)) % count; // not completely random.
-	f.speed = (2 * (my_rand() & 0x0f)) + 5;
+	f.speed = 0;
+	uint8_t tryLeds = 100;
+	while (tryLeds--)
+	{
+        f.position = (my_rand() ^ (my_rand()>>1)) % count; // not completely random.
+	    if (   (    onlyZeroLeds and get(leds, f.position) == base_color)
+	        or (not onlyZeroLeds and get(leds, f.position) != base_color))
+	    {
+	        tryLeds = 0;
+	        f.speed = ( (my_rand() & 0x07)) + 1;
+	    }
+	}
+
 }
 
 template<uint8_t flare_count, typename buffer_type>
-void flares(buffer_type &leds, uint8_t channel)
+void flares(buffer_type &leds, uint8_t channel, uint16_t duration, int8_t direction = 0)
 {
-
-	const uint8_t led_count = ws2811::led_buffer_traits<buffer_type>::count;
 
 	flare<buffer_type, uint8_t> flares[flare_count];
 	uint8_t current_flare = 0;
 	uint8_t flare_pause = 1;
 
-	for (;;)
+	for (;duration;--duration)
 	{
 		if (flare_pause)
 		{
@@ -123,24 +145,38 @@ void flares(buffer_type &leds, uint8_t channel)
 		{
 			if (!flares[current_flare].amplitude)
 			{
-				create_random_flare(flares[current_flare], led_count);
-				flare_pause = my_rand() % 20;
+				create_random_flare(flares[current_flare], leds, direction >= 0);
+				flare_pause = 0;//my_rand() % 11;
 			}
 			++current_flare;
 		}
 		if (current_flare >= flare_count)
 			current_flare = 0;
 
-		clear(leds);
 		for (uint8_t idx = 0; idx < flare_count; ++idx)
 		{
-			flares[idx].step(leds);
+			flares[idx].step(leds, direction);
 		}
 
 		send(leds, channel);
-		_delay_ms(20);
+		_delay_ms(30);
 	}
 }
+
+template<uint8_t flare_count, typename buffer_type>
+void flares(buffer_type &leds, uint8_t channel)
+{
+    DDRD = 255;
+    for (uint8_t counter = 0; counter < ws2811::led_buffer_traits<buffer_type>::count; ++counter)
+    {
+        get( leds, counter) = base_color;
+    }
+    for (;;)
+    {
+        flares<flare_count>( leds, channel, 65535, 0);
+    }
+}
+
 } // end namespace flares
 
 #endif /* FLARES_HPP_ */
