@@ -36,16 +36,11 @@
 
 namespace {
 
-// selects the pin (the bit of the chosen port).
-// this must be in the range 0-7
-static const uint8_t 	channel = 4;
-
-// the number of LEDs in the string.
-static const uint16_t 	led_count = 144;
-
 // declare one RGB value for each led.
-ws2811::rgb leds[led_count];
+ws2811::rgb leds[144];
 
+// transmit at port C4
+static const uint8_t    channel = 4;
 ws2811::Transmitter< ws2811::AtPortC> transmitter( channel);
 
 }

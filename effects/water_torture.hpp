@@ -23,7 +23,7 @@ namespace water_torture
 		static uint16_t state;
 		uint8_t count = 1+ state %5;
 		state += count *33203;
-		return state; // adding a prime number
+		return state; 
 	}
 
 	uint8_t mult( uint8_t value, uint16_t multiplier)
@@ -217,8 +217,8 @@ private:
 	/// Create the complete water torture animation.
 	/// This will render droplets at random intervals, up to a given maximum number of droplets.
 	/// The maximum led count is 256
-	template< uint8_t droplet_count, typename buffer_type>
-	void inline animate( buffer_type &leds, uint8_t channel)
+	template< uint8_t droplet_count, typename buffer_type, typename transmitter_type>
+	void inline animate( buffer_type &leds, const transmitter_type &transmitter)
 	{
 		static const uint16_t led_count = ws2811::led_buffer_traits<buffer_type>::count;
 
@@ -254,7 +254,7 @@ private:
 	    		droplets[idx].step( leds);
 	    	}
 
-	    	send( leds, channel);
+	    	transmitter.transmit( leds);
 	    	_delay_ms( 1);
 	    }
 	}
