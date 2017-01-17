@@ -187,8 +187,8 @@ void flares_step(
     }
 }
 
-template<uint8_t flare_count, typename buffer_type>
-void flares(buffer_type &leds, uint8_t channel)
+template<uint8_t flare_count, typename buffer_type, typename transmitter_type>
+void flares(buffer_type &leds, const transmitter_type &transmitter)
 {
     flares::flare<buffer_type, uint8_t> flares[flare_count];
     fill( leds, base_color);
@@ -198,7 +198,7 @@ void flares(buffer_type &leds, uint8_t channel)
     while (true)
     {
         flares_step( leds, flares, current_flare, flare_pause);
-        send( leds, channel);
+        transmitter.transmit( leds);
         _delay_ms( 30);
     }
 }

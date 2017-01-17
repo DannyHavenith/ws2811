@@ -14,22 +14,29 @@
 #define WS2811_8_H_
 #include <avr/io.h>
 #include <util/delay_basic.h>
-
+#include "port_io_address.hpp"
 #include "rgb.h"
 
 namespace ws2811
 {
 
+namespace
+{
+PortIoAddress< _SFR_IO_ADDR( WS2811_PORT)> DefaultWs2811Port;
+}
+
 /**
  * This function sends the RGB-data in an array of rgb structs through
  * the given io-pin.
- * The port is determined by the macro WS2811_PORT, but the actual pin to
+ * The port is determined by the type of the 4th argument, the actual pin to
  * be used is an argument to this function. This allows a single instance of this function
  * to control up to 8 separate channels.
  */
-void send( const void *values, uint16_t array_size, uint8_t bit)
+template< typename PortType>
+void send( const void *values, uint16_t array_size, uint8_t bit, const PortType &port)
 {
     const uint8_t mask =_BV(bit);
+
     uint8_t low_val = WS2811_PORT & (~mask);
     uint8_t high_val = WS2811_PORT | mask;
     uint16_t size = array_size * sizeof( rgb); // size in bytes
@@ -47,38 +54,38 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
     // to label cont06. The two-digit suffix of labels shows the "phase" of the signal at the time
     // of the execution, 00 being the first clock tick of the bit and 09 being the last.
     asm volatile(
-    		"start:  LDI %[bits], 7                          \n" // start code, load bit count
-    		"        LD __tmp_reg__, %a[dataptr]+            \n" // fetch first byte
-    		"cont06: NOP                                     \n"
-    		"cont07: NOP                                     \n"
-    		"        OUT %[portout], %[downreg]              \n" // Force line down, even if it already was down
-    		"cont09: LSL __tmp_reg__                         \n" // Load next bit into carry flag.
-    		"s00:    OUT %[portout], %[upreg]                \n" // Start of bit, bit value is in carry flag
-    		"        BRCS skip03                             \n" // only lower the line if the bit...
-    		"        OUT %[portout], %[downreg]              \n" // ...in the carry flag was zero.
-    		"skip03: SUBI %[bits], 1                         \n" // Decrease bit count...
-    		"        BRNE cont06                             \n" // ...and loop if not zero
-    		"        LSL __tmp_reg__                         \n" // Load the last bit into the carry flag
-    		"        BRCC Lx008                              \n" // Jump if last bit is zero
-    		"        LDI %[bits], 7                          \n" // Reset bit counter to 7
-    		"        OUT %[portout], %[downreg]              \n" // Force line down, even if it already was down
-    		"        NOP                                     \n"
-    		"        OUT %[portout], %[upreg]                \n" // Start of last bit of byte, which is 1
-    		"        SBIW %[bytes], 1                        \n" // Decrease byte count
-    		"        LD __tmp_reg__, %a[dataptr]+            \n" // Load next byte
-    		"        BRNE cont07                             \n" // Loop if byte count is not zero
-    		"        RJMP brk18                              \n" // Byte count is zero, jump to the end
-    		"Lx008:  OUT %[portout], %[downreg]              \n" // Last bit is zero
-    		"        LDI %[bits], 7                          \n" // Reset bit counter to 7
-    		"        OUT %[portout], %[upreg]                \n" // Start of last bit of byte, which is 0
-    		"        NOP                                     \n"
-    		"        OUT %[portout], %[downreg]              \n" // We know we're transmitting a 0
-    		"        SBIW %[bytes], 1                        \n" // Decrease byte count
-    		"        LD __tmp_reg__, %a[dataptr]+            \n"
-    		"        BRNE cont09                             \n" // Loop if byte count is not zero
-    		"brk18:  OUT %[portout], %[downreg]              \n"
-    		"                                                \n" // used to be a NOP here, but returning from the function takes long enough
-    		"                                                \n" // We're done.
+    		"start%=:  LDI %[bits], 7                          \n" // start code, load bit count
+    		"          LD __tmp_reg__, %a[dataptr]+            \n" // fetch first byte
+    		"cont06%=: NOP                                     \n"
+    		"cont07%=: NOP                                     \n"
+    		"          OUT %[portout], %[downreg]              \n" // Force line down, even if it already was down
+    		"cont09%=: LSL __tmp_reg__                         \n" // Load next bit into carry flag.
+    		"s00%=:    OUT %[portout], %[upreg]                \n" // Start of bit, bit value is in carry flag
+    		"          BRCS skip03%=                           \n" // only lower the line if the bit...
+    		"          OUT %[portout], %[downreg]              \n" // ...in the carry flag was zero.
+    		"skip03%=: SUBI %[bits], 1                         \n" // Decrease bit count...
+    		"          BRNE cont06%=                           \n" // ...and loop if not zero
+    		"          LSL __tmp_reg__                         \n" // Load the last bit into the carry flag
+    		"          BRCC Lx008%=                            \n" // Jump if last bit is zero
+    		"          LDI %[bits], 7                          \n" // Reset bit counter to 7
+    		"          OUT %[portout], %[downreg]              \n" // Force line down, even if it already was down
+    		"          NOP                                     \n"
+    		"          OUT %[portout], %[upreg]                \n" // Start of last bit of byte, which is 1
+    		"          SBIW %[bytes], 1                        \n" // Decrease byte count
+    		"          LD __tmp_reg__, %a[dataptr]+            \n" // Load next byte
+    		"          BRNE cont07%=                           \n" // Loop if byte count is not zero
+    		"          RJMP brk18%=                            \n" // Byte count is zero, jump to the end
+    		"Lx008%=:  OUT %[portout], %[downreg]              \n" // Last bit is zero
+    		"          LDI %[bits], 7                          \n" // Reset bit counter to 7
+    		"          OUT %[portout], %[upreg]                \n" // Start of last bit of byte, which is 0
+    		"          NOP                                     \n"
+    		"          OUT %[portout], %[downreg]              \n" // We know we're transmitting a 0
+    		"          SBIW %[bytes], 1                        \n" // Decrease byte count
+    		"          LD __tmp_reg__, %a[dataptr]+            \n"
+    		"          BRNE cont09%=                           \n" // Loop if byte count is not zero
+    		"brk18%=:  OUT %[portout], %[downreg]              \n"
+    		"                                                  \n" // used to be a NOP here, but returning from the function takes long enough
+    		"                                                  \n" // We're done.
 : /* no output */
 : /* inputs */
 [dataptr] "e" (values), 	// pointer to grb values
@@ -86,9 +93,14 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
 [downreg] "r" (low_val),	// register that contains the "down" value for the output port (constant)
 [bytes]   "w" (size),		// number of bytes to send
 [bits]    "d" (bitcount),       // number of bits/2
-[portout] "I" (_SFR_IO_ADDR(WS2811_PORT)) // The port to use
+[portout] "I" (PortType::value) // The port to use
     );
 
+}
+
+inline void send( const void *values, uint16_t array_size, uint8_t bit)
+{
+    send( values, array_size, bit, DefaultWs2811Port);
 }
 
 }

@@ -38,6 +38,37 @@ struct led_buffer_traits
 namespace ws2811 {
 
 /**
+ * WS2811 transmitter that can send LED values to a given pin on a given port.
+ *
+ * The port is a type argument (PortPlaceHolder) and is typically one of the
+ * place holders ws2811::AtPortA, AtPortB, ..., AtPortF
+ *
+ * If you're getting an error about AtPortX not being defined for a port (A..F),
+ * consider whether your platform actually has the given port.
+ *
+ * This class is agnostic with regard to the actual LED buffer implementation,
+ * it can either be an array of rgb values, a sparse_leds instance, or in fact any
+ * type for which a send() overload is available as a free function.
+ */
+template< typename PortPlaceHolder>
+class Transmitter
+{
+public:
+    Transmitter( uint8_t pin)
+    :m_pin( pin)
+    {}
+
+    template< typename BufferType>
+    void __attribute__((noinline)) transmit( BufferType &buffer) const
+    {
+        send( buffer, m_pin, PortPlaceHolder{});
+    }
+
+private:
+    uint8_t m_pin;
+};
+
+/**
  * Convenience wrapper around the send() function.
  * This overload auto-detects the array size of the given rgb values.
  */
@@ -45,6 +76,12 @@ template< uint16_t array_size>
 inline void send( rgb (&values)[array_size], uint8_t bit)
 {
 	send( &values[0], array_size, bit);
+}
+
+template< uint16_t array_size, typename PortPlaceHolder>
+inline void send( rgb (&values)[array_size], uint8_t bit, const PortPlaceHolder &port)
+{
+    send( &values[0], array_size, bit, port);
 }
 
 template< uint16_t array_size>

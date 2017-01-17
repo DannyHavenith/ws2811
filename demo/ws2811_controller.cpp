@@ -23,20 +23,16 @@
 #include <util/delay.h>
 #include <stdlib.h>
 
-// Define the port at which the signal will be sent. The port needs to
-// be known at compilation time, the pin (0-7) can be chosen at run time.
-#define WS2811_PORT PORTC
-
 // send RGB in R,G,B order instead of the standard WS2811 G,R,B order.
 // Most ws2811 LED strips take their colors in GRB order, while some LED strings
 // take them in RGB. Default is GRB, define this symbol for RGB.
 #define STRAIGHT_RGB
-
-#include "effects/chasers.hpp"
+#include "ws2811/ws2811.h"
+//#include "effects/chasers.hpp"
 #include "effects/flares.hpp"
-#include "effects/color_cycle.hpp"
-#include "effects/water_torture.hpp"
-#include "effects/campfire.hpp"
+//#include "effects/color_cycle.hpp"
+//#include "effects/water_torture.hpp"
+//#include "effects/campfire.hpp"
 
 namespace {
 
@@ -49,6 +45,9 @@ static const uint16_t 	led_count = 50;
 
 // declare one RGB value for each led.
 ws2811::rgb leds[led_count];
+
+ws2811::Transmitter< ws2811::AtPortC> transmitter( channel);
+
 }
 
 int main()
@@ -58,8 +57,9 @@ int main()
 
     //campfire( leds, channel);
     //water_torture::animate<3>( leds, channel);
-    flares::flares<10>( leds, channel);
+    flares::flares<20>( leds, transmitter);
     //chasers( leds, channel);
     //color_cycle::color_cycle(pattern, leds, channel);
-
+//    send( leds, channel);
+//    send( leds, channel);
 }
