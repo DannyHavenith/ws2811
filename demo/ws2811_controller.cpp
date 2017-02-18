@@ -45,7 +45,7 @@ namespace {
 static const uint8_t 	channel = 4;
 
 // the number of LEDs in the string.
-static const uint16_t 	led_count = 50;
+static const uint16_t 	led_count = 144;
 
 // declare one RGB value for each led.
 ws2811::rgb leds[led_count];
@@ -57,8 +57,8 @@ int main()
 
 
     //campfire( leds, channel);
-    //water_torture::animate<3>( leds, channel);
-    flares::flares<10>( leds, channel);
+    water_torture::animate<3>( leds, channel);
+    //flares::flares<10>( leds, channel);
     //chasers( leds, channel);
     //color_cycle::color_cycle(pattern, leds, channel);
 
