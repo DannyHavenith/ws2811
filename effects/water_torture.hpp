@@ -13,11 +13,17 @@
 namespace water_torture
 {
 	using ws2811::rgb;
-	/// very crude pseudo random generator
+	
+	/// very crude pseudo random generator.
+	///
+	/// The idea is to have a good enough random generator
+	/// with a minimum of program space.
 	uint16_t my_rand()
 	{
 		static uint16_t state;
-		return state += 33203; // adding a prime number
+		uint8_t count = 1+ state %5;
+		state += count *33203;
+		return state; // adding a prime number
 	}
 
 	uint8_t mult( uint8_t value, uint16_t multiplier)
@@ -70,7 +76,7 @@ namespace water_torture
 					{
 						// reverse direction and dampen the speed
 						position = maxpos16 - (position - maxpos16);
-						speed = -speed/4;
+						speed = -speed/3;
 						color = scale( color, 10);
 						state = bouncing;
 					}
@@ -79,7 +85,7 @@ namespace water_torture
 			else if (allow_swelling && state == swelling)
 			{
 				++position;
-				if ( color.blue <= 10 || color.blue - position <= 10)
+				if ( color.blue <= 10 || color.blue - position/2 <= 10)
 				{
 					state = falling;
 					position = 0;
@@ -171,7 +177,7 @@ private:
 		rgb 	 color;
 		uint16_t position; //< position in 8.8 fixed point, 256 means at LED 1, 384 means between LEDS 1 and 2, etc.
 		int16_t  speed;    //< speed in 8.8 fixed point, 256 means 1 LED per cycle, 512 means 2 LEDs/cycle, etc.
-		static const uint16_t gravity = 5;
+		static const uint16_t gravity = 8;
 		enum stateval {
 			inactive,
 			swelling,
@@ -220,10 +226,10 @@ private:
 	    // more than 255 leds, which doesn't work for this function.
 	    static_assert_< led_count <= 255>::is_true();
 
-	    typedef droplet<buffer_type, false> droplet_type;
+	    typedef droplet<buffer_type, true> droplet_type;
 	    droplet_type droplets[droplet_count]; // droplets that can animate simultaneously.
 	    uint8_t current_droplet = 0; // index of the next droplet to be created
-	    uint8_t droplet_pause = 1; // how long to wait for the next one
+	    uint16_t droplet_pause = 1; // how long to wait for the next one
 
 	    for(;;)
 	    {
@@ -238,7 +244,7 @@ private:
 	    			create_random_droplet( droplets[current_droplet]);
 	    			++current_droplet;
 	    			if (current_droplet >= droplet_count) current_droplet = 0;
-	    			droplet_pause = 100 + my_rand() % 80;
+	    			droplet_pause = 200 + my_rand() % 128;
 	    		}
 	    	}
 
@@ -249,7 +255,7 @@ private:
 	    	}
 
 	    	send( leds, channel);
-	    	_delay_ms( 7);
+	    	_delay_ms( 1);
 	    }
 	}
 }
