@@ -42,7 +42,7 @@ namespace ws2811 {
  * This overload auto-detects the array size of the given rgb values.
  */
 template< uint16_t array_size>
-inline void send( rgb (&values)[array_size], uint8_t bit)
+inline void send( const rgb (&values)[array_size], uint8_t bit)
 {
 	send( &values[0], array_size, bit);
 }
