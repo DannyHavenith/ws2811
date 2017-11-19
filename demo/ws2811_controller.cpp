@@ -30,7 +30,7 @@
 // send RGB in R,G,B order instead of the standard WS2811 G,R,B order.
 // Most ws2811 LED strips take their colors in GRB order, while some LED strings
 // take them in RGB. Default is GRB, define this symbol for RGB.
-#define STRAIGHT_RGB
+//#define STRAIGHT_RGB
 
 #include "effects/chasers.hpp"
 #include "effects/flares.hpp"

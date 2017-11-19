@@ -42,9 +42,17 @@ void send( const void *values, uint16_t array_size, uint8_t bit)
 
     // The labels in this piece of assembly code aren't very explanatory. The real documentation
     // of this code can be found in the spreadsheet ws2811@8Mhz.ods
-    // A hint if you still want to follow the code below: The code for a regular bit (i.e. bits 7-1)
-    // starts at label s00 with the current bit value already in the carry flag and it jumps halfway
-    // to label cont06. The two-digit suffix of labels shows the "phase" of the signal at the time
+    // A hint if you still want to follow the code below:
+    // The code will send bits from most significant to least significant (bits 7 to 0) and consists
+    // of two variants of the main loop:
+    // 1) The code for a regular bit (i.e. bits 7-1) starts at label s00 with the current bit value
+    // already in the carry flag and it jumps halfway back to label cont06.
+    // 2) For a part of bit 1 and all of bit 0, the code falls through (after the skip03 label)
+    // where the code needs to fork in a "transmit 0" and "transmit 1" branch. This is because
+    // there's extra work to be done (loading the next byte), which needs to be carefully placed
+    // in the time between toggling the output pins.
+    //
+    // The two-digit suffix of labels shows the "phase" of the signal at the time
     // of the execution, 00 being the first clock tick of the bit and 09 being the last.
     asm volatile(
     		"start:  LDI %[bits], 7                          \n" // start code, load bit count
